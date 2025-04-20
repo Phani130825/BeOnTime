@@ -57,6 +57,21 @@ const habitSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Challenge'
     },
+    isCommunityAdminHabit: {
+        type: Boolean,
+        default: false
+    },
+    community: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Community'
+    },
+    communityAdminHabitId: {
+        type: mongoose.Schema.Types.ObjectId
+    },
+    createdBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    },
     startDate: {
         type: Date,
         default: Date.now
@@ -99,8 +114,9 @@ const habitSchema = new mongoose.Schema({
         },
         completed: {
             type: Boolean,
-            default: false
-        }
+            required: true
+        },
+        notes: String
     }],
     completed: {
         type: Boolean,
@@ -142,7 +158,7 @@ const habitSchema = new mongoose.Schema({
 
 // Update timestamps on save
 habitSchema.pre('save', function(next) {
-    this.updatedAt = Date.now();
+    this.updatedAt = new Date();
     next();
 });
 
@@ -222,17 +238,62 @@ habitSchema.methods.updateStreak = function() {
 };
 
 // Method to mark habit as completed for a specific date
-habitSchema.methods.markCompleted = async function(date) {
-    const progressIndex = this.progress.findIndex(p => 
-        p.date.toDateString() === date.toDateString()
-    );
+habitSchema.methods.markCompleted = async function(notes = '') {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
     
-    if (progressIndex === -1) {
-        this.progress.push({ date, completed: true });
+    const todayProgress = this.progress.find(p => {
+        const progressDate = new Date(p.date);
+        progressDate.setHours(0, 0, 0, 0);
+        return progressDate.getTime() === today.getTime();
+    });
+    
+    if (todayProgress) {
+        todayProgress.completed = true;
+        todayProgress.notes = notes;
     } else {
-        this.progress[progressIndex].completed = true;
+        this.progress.push({
+            date: today,
+            completed: true,
+            notes
+        });
     }
     
+    // Update streak
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    const yesterdayProgress = this.progress.find(p => {
+        const progressDate = new Date(p.date);
+        progressDate.setHours(0, 0, 0, 0);
+        return progressDate.getTime() === yesterday.getTime();
+    });
+    
+    if (yesterdayProgress && yesterdayProgress.completed) {
+        this.streak += 1;
+    } else {
+        this.streak = 1;
+    }
+    
+    await this.save();
+};
+
+// Method to mark habit as incomplete for today
+habitSchema.methods.markIncomplete = async function() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const todayProgress = this.progress.find(p => {
+        const progressDate = new Date(p.date);
+        progressDate.setHours(0, 0, 0, 0);
+        return progressDate.getTime() === today.getTime();
+    });
+    
+    if (todayProgress) {
+        todayProgress.completed = false;
+    }
+    
+    this.streak = 0;
     await this.save();
 };
 
@@ -251,6 +312,20 @@ habitSchema.methods.getCompletionRate = function() {
     
     const completedDays = this.progress.filter(p => p.completed).length;
     return (completedDays / totalDays) * 100;
+};
+
+// Method to check if a habit is completed for today
+habitSchema.methods.isCompletedToday = function() {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    const todayProgress = this.progress.find(p => {
+        const progressDate = new Date(p.date);
+        progressDate.setHours(0, 0, 0, 0);
+        return progressDate.getTime() === today.getTime();
+    });
+    
+    return todayProgress ? todayProgress.completed : false;
 };
 
 // Index for faster queries

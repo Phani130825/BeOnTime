@@ -36,7 +36,7 @@ const communitySchema = new mongoose.Schema({
       default: 'member'
     }
   }],
-  tasks: [{
+  adminHabits: [{
     title: {
       type: String,
       required: true
@@ -69,6 +69,11 @@ const communitySchema = new mongoose.Schema({
         },
         message: props => `${props.value} is not a valid time format! Use HH:mm format.`
       }
+    },
+    createdBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
     },
     createdAt: {
       type: Date,
@@ -106,52 +111,68 @@ communitySchema.pre('save', function(next) {
   next();
 });
 
-// Method to add a task to all members' habits
-communitySchema.methods.addTaskToMemberHabits = async function(task, Habit) {
+// Method to add an admin habit to all members' habits
+communitySchema.methods.addAdminHabitToMembers = async function(adminHabit, Habit) {
   const members = this.members.map(m => m.user);
   const habits = members.map(userId => ({
     user: userId,
-    title: task.title,
-    description: task.description,
+    title: adminHabit.title,
+    description: adminHabit.description,
     category: this.category,
-    frequency: task.frequency,
-    targetDays: task.targetDays,
-    startTime: task.startTime,
-    endTime: task.endTime,
-    isCommunityTask: true,
+    frequency: adminHabit.frequency,
+    targetDays: adminHabit.targetDays,
+    startTime: adminHabit.startTime,
+    endTime: adminHabit.endTime,
+    isCommunityAdminHabit: true,
     community: this._id,
-    communityTaskId: task._id
+    communityAdminHabitId: adminHabit._id,
+    createdBy: adminHabit.createdBy
   }));
   
   await Habit.insertMany(habits);
 };
 
-// Method to remove a task from all members' habits
-communitySchema.methods.removeTaskFromMemberHabits = async function(taskId, Habit) {
+// Method to remove an admin habit from all members' habits
+communitySchema.methods.removeAdminHabitFromMembers = async function(adminHabitId, Habit) {
   await Habit.deleteMany({
     community: this._id,
-    communityTaskId: taskId
+    communityAdminHabitId: adminHabitId
   });
 };
 
-// Method to update a task in all members' habits
-communitySchema.methods.updateTaskInMemberHabits = async function(task, Habit) {
+// Method to update an admin habit in all members' habits
+communitySchema.methods.updateAdminHabitInMembers = async function(adminHabit, Habit) {
   await Habit.updateMany(
     {
       community: this._id,
-      communityTaskId: task._id
+      communityAdminHabitId: adminHabit._id
     },
     {
       $set: {
-        title: task.title,
-        description: task.description,
-        frequency: task.frequency,
-        targetDays: task.targetDays,
-        startTime: task.startTime,
-        endTime: task.endTime
+        title: adminHabit.title,
+        description: adminHabit.description,
+        frequency: adminHabit.frequency,
+        targetDays: adminHabit.targetDays,
+        startTime: adminHabit.startTime,
+        endTime: adminHabit.endTime
       }
     }
   );
+};
+
+// Method to get all members' progress for a specific admin habit
+communitySchema.methods.getAdminHabitProgress = async function(adminHabitId, Habit) {
+  const habits = await Habit.find({
+    community: this._id,
+    communityAdminHabitId: adminHabitId
+  }).populate('user', 'name email');
+  
+  return habits.map(habit => ({
+    user: habit.user,
+    streak: habit.streak,
+    progress: habit.progress,
+    lastCompleted: habit.progress.length > 0 ? habit.progress[habit.progress.length - 1].date : null
+  }));
 };
 
 const Community = mongoose.model('Community', communitySchema);

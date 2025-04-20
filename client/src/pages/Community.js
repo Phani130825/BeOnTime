@@ -22,10 +22,17 @@ import {
   Tabs,
   Tab,
   IconButton,
-  Tooltip
+  Tooltip,
+  List,
+  ListItem,
+  ListItemText,
+  ListItemSecondaryAction
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
+import AssignmentIcon from '@mui/icons-material/Assignment';
 import api from '../config/api';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -49,6 +56,8 @@ const Community = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [showCreateCommunity, setShowCreateCommunity] = useState(false);
   const [showCreateChallenge, setShowCreateChallenge] = useState(false);
+  const [showManageHabits, setShowManageHabits] = useState(false);
+  const [selectedCommunity, setSelectedCommunity] = useState(null);
   const [newCommunity, setNewCommunity] = useState({
     name: '',
     description: '',
@@ -68,6 +77,14 @@ const Community = () => {
       targetDays: 30,
       duration: 30 // in minutes
     }
+  });
+  const [newAdminHabit, setNewAdminHabit] = useState({
+    title: '',
+    description: '',
+    frequency: 'Daily',
+    targetDays: 30,
+    startTime: '09:00',
+    endTime: '17:00'
   });
 
   useEffect(() => {
@@ -152,6 +169,45 @@ const Community = () => {
     } catch (err) {
       console.error('Error joining challenge:', err);
       setError(err.response?.data?.message || 'Failed to join challenge');
+    }
+  };
+
+  const handleCreateAdminHabit = async () => {
+    try {
+      await api.post(`/api/communities/${selectedCommunity._id}/admin-habits`, newAdminHabit);
+      setShowManageHabits(false);
+      setNewAdminHabit({
+        title: '',
+        description: '',
+        frequency: 'Daily',
+        targetDays: 30,
+        startTime: '09:00',
+        endTime: '17:00'
+      });
+      fetchData();
+    } catch (err) {
+      console.error('Error creating admin habit:', err);
+      setError(err.response?.data?.message || 'Failed to create admin habit');
+    }
+  };
+
+  const handleDeleteAdminHabit = async (habitId) => {
+    try {
+      await api.delete(`/api/communities/${selectedCommunity._id}/admin-habits/${habitId}`);
+      fetchData();
+    } catch (err) {
+      console.error('Error deleting admin habit:', err);
+      setError(err.response?.data?.message || 'Failed to delete admin habit');
+    }
+  };
+
+  const handleUpdateAdminHabit = async (habitId, updatedHabit) => {
+    try {
+      await api.put(`/api/communities/${selectedCommunity._id}/admin-habits/${habitId}`, updatedHabit);
+      fetchData();
+    } catch (err) {
+      console.error('Error updating admin habit:', err);
+      setError(err.response?.data?.message || 'Failed to update admin habit');
     }
   };
 
@@ -242,6 +298,19 @@ const Community = () => {
                       />
                     </Box>
                   </CardContent>
+                  <CardActions>
+                    <Button
+                      variant="outlined"
+                      color="primary"
+                      startIcon={<AssignmentIcon />}
+                      onClick={() => {
+                        setSelectedCommunity(community);
+                        setShowManageHabits(true);
+                      }}
+                    >
+                      Manage Habits
+                    </Button>
+                  </CardActions>
                 </StyledCard>
               </Grid>
             ))}
@@ -551,6 +620,146 @@ const Community = () => {
           <Button onClick={() => setShowCreateChallenge(false)}>Cancel</Button>
           <Button onClick={handleCreateChallenge} variant="contained" color="primary">
             Create
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Manage Habits Dialog */}
+      <Dialog 
+        open={showManageHabits} 
+        onClose={() => setShowManageHabits(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          Manage Community Habits - {selectedCommunity?.name}
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ mb: 3 }}>
+            <Typography variant="h6" gutterBottom>
+              Add New Habit
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  label="Habit Title"
+                  value={newAdminHabit.title}
+                  onChange={(e) => setNewAdminHabit({ ...newAdminHabit, title: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={2}
+                  label="Description"
+                  value={newAdminHabit.description}
+                  onChange={(e) => setNewAdminHabit({ ...newAdminHabit, description: e.target.value })}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  select
+                  label="Frequency"
+                  value={newAdminHabit.frequency}
+                  onChange={(e) => setNewAdminHabit({ ...newAdminHabit, frequency: e.target.value })}
+                >
+                  <MenuItem value="Daily">Daily</MenuItem>
+                  <MenuItem value="Weekly">Weekly</MenuItem>
+                  <MenuItem value="Monthly">Monthly</MenuItem>
+                </TextField>
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth
+                  type="number"
+                  label="Target Days"
+                  value={newAdminHabit.targetDays}
+                  onChange={(e) => setNewAdminHabit({ ...newAdminHabit, targetDays: parseInt(e.target.value) })}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <Typography variant="subtitle1" gutterBottom>
+                  Habit Time Window
+                </Typography>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="time"
+                      label="Start Time"
+                      value={newAdminHabit.startTime}
+                      onChange={(e) => setNewAdminHabit({ ...newAdminHabit, startTime: e.target.value })}
+                      InputLabelProps={{ shrink: true }}
+                      inputProps={{
+                        step: 300 // 5 min
+                      }}
+                    />
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <TextField
+                      fullWidth
+                      type="time"
+                      label="End Time"
+                      value={newAdminHabit.endTime}
+                      onChange={(e) => setNewAdminHabit({ ...newAdminHabit, endTime: e.target.value })}
+                      InputLabelProps={{ shrink: true }}
+                      inputProps={{
+                        step: 300 // 5 min
+                      }}
+                    />
+                  </Grid>
+                </Grid>
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+                  Members will be notified to complete the habit within this time window
+                </Typography>
+              </Grid>
+            </Grid>
+          </Box>
+
+          <Typography variant="h6" gutterBottom>
+            Existing Habits
+          </Typography>
+          <List>
+            {selectedCommunity?.adminHabits.map((habit) => (
+              <ListItem key={habit._id}>
+                <ListItemText
+                  primary={habit.title}
+                  secondary={
+                    <>
+                      <Typography component="span" variant="body2" color="text.primary">
+                        {habit.description}
+                      </Typography>
+                      <br />
+                      Frequency: {habit.frequency} | Target Days: {habit.targetDays}
+                      <br />
+                      Time Window: {habit.startTime} - {habit.endTime}
+                    </>
+                  }
+                />
+                <ListItemSecondaryAction>
+                  <IconButton 
+                    edge="end" 
+                    aria-label="delete"
+                    onClick={() => handleDeleteAdminHabit(habit._id)}
+                  >
+                    <DeleteIcon />
+                  </IconButton>
+                </ListItemSecondaryAction>
+              </ListItem>
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowManageHabits(false)}>Cancel</Button>
+          <Button 
+            onClick={handleCreateAdminHabit}
+            variant="contained"
+            color="primary"
+          >
+            Add Habit
           </Button>
         </DialogActions>
       </Dialog>
