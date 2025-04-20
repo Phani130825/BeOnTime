@@ -19,6 +19,7 @@ import {
   ListItem,
   ListItemIcon,
   ListItemText,
+  useTheme,
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -34,11 +35,14 @@ import { motion } from 'framer-motion';
 import api from '../config/api';
 import { format, parseISO } from 'date-fns';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme as useAppTheme } from '../contexts/ThemeContext';
 
 const MotionBox = motion(Box);
 
 const ProfilePopup = ({ open, onClose }) => {
   const { logout } = useAuth();
+  const theme = useTheme();
+  const { isDarkMode } = useAppTheme();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -187,7 +191,9 @@ const ProfilePopup = ({ open, onClose }) => {
         PaperProps={{
           sx: {
             borderRadius: 2,
-            background: 'linear-gradient(145deg, #ffffff, #f0f0f0)',
+            background: isDarkMode 
+              ? 'linear-gradient(145deg, #1e1e1e, #2d2d2d)' 
+              : 'linear-gradient(145deg, #ffffff, #f0f0f0)',
           },
         }}
       >
@@ -201,236 +207,154 @@ const ProfilePopup = ({ open, onClose }) => {
             </IconButton>
           </Box>
         </DialogTitle>
-        <DialogContent dividers>
+        <Divider />
+        <DialogContent>
           {loading ? (
             <Box sx={{ display: 'flex', justifyContent: 'center', p: 3 }}>
               <CircularProgress />
             </Box>
           ) : error ? (
-            <Alert severity="error" sx={{ mb: 2 }}>
+            <Alert severity="error" sx={{ mt: 2 }}>
               {error}
             </Alert>
           ) : (
             <Grid container spacing={3}>
               <Grid item xs={12} md={4}>
-                <Paper
-                  elevation={3}
-                  sx={{
-                    p: 3,
-                    borderRadius: 2,
-                    textAlign: 'center',
-                    background: 'linear-gradient(145deg, #ffffff, #f5f5f5)',
-                  }}
-                >
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
                   <Avatar
+                    src={userData?.profilePicture}
+                    alt={userData?.username}
                     sx={{
                       width: 120,
                       height: 120,
-                      margin: '0 auto 20px',
-                      fontSize: '3rem',
-                      background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                      mb: 2,
+                      border: `4px solid ${theme.palette.primary.main}`,
                     }}
                   >
                     {userData?.username?.charAt(0).toUpperCase() || 'U'}
                   </Avatar>
-                  <Typography variant="h6" gutterBottom>
-                    {userData?.username || 'User'}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary" gutterBottom>
-                    {userData?.email || 'No email provided'}
-                  </Typography>
+                  <Typography variant="h6">{userData?.username}</Typography>
                   <Typography variant="body2" color="text.secondary">
-                    Member since {formatDate(userData?.createdAt)}
+                    {userData?.email}
                   </Typography>
+                  <Button
+                    variant="outlined"
+                    startIcon={<EditIcon />}
+                    onClick={() => setEditMode(!editMode)}
+                    sx={{ mt: 2 }}
+                  >
+                    {editMode ? 'Cancel' : 'Edit Profile'}
+                  </Button>
+                </Box>
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 2,
+                    borderRadius: 2,
+                    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                  }}
+                >
+                  <Typography variant="subtitle1" gutterBottom>
+                    Account Stats
+                  </Typography>
+                  <List dense>
+                    <ListItem>
+                      <ListItemIcon>
+                        <CheckCircleIcon color="primary" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Total Habits"
+                        secondary={stats.totalHabits}
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon>
+                        <CheckCircleIcon color="success" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Completed Habits"
+                        secondary={stats.completedHabits}
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon>
+                        <CheckCircleIcon color="secondary" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Current Streak"
+                        secondary={`${stats.currentStreak} days`}
+                      />
+                    </ListItem>
+                    <ListItem>
+                      <ListItemIcon>
+                        <CheckCircleIcon color="info" />
+                      </ListItemIcon>
+                      <ListItemText
+                        primary="Longest Streak"
+                        secondary={`${stats.longestStreak} days`}
+                      />
+                    </ListItem>
+                  </List>
                 </Paper>
               </Grid>
-
               <Grid item xs={12} md={8}>
                 <Paper
-                  elevation={3}
+                  elevation={0}
                   sx={{
                     p: 3,
                     borderRadius: 2,
-                    background: 'linear-gradient(145deg, #ffffff, #f5f5f5)',
+                    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
                   }}
                 >
-                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                    <Typography variant="h6">Habit Statistics</Typography>
-                  </Box>
-                  <Grid container spacing={2}>
-                    <Grid item xs={6} sm={3}>
-                      <Paper
-                        elevation={2}
-                        sx={{
-                          p: 2,
-                          textAlign: 'center',
-                          borderRadius: 2,
-                          background: 'linear-gradient(45deg, #4CAF50 30%, #81C784 90%)',
-                          color: 'white',
-                        }}
-                      >
-                        <Typography variant="h4">{stats.totalHabits}</Typography>
-                        <Typography variant="body2">Total Habits</Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <Paper
-                        elevation={2}
-                        sx={{
-                          p: 2,
-                          textAlign: 'center',
-                          borderRadius: 2,
-                          background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-                          color: 'white',
-                        }}
-                      >
-                        <Typography variant="h4">{stats.completedHabits}</Typography>
-                        <Typography variant="body2">Completed</Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <Paper
-                        elevation={2}
-                        sx={{
-                          p: 2,
-                          textAlign: 'center',
-                          borderRadius: 2,
-                          background: 'linear-gradient(45deg, #FF9800 30%, #FFB74D 90%)',
-                          color: 'white',
-                        }}
-                      >
-                        <Typography variant="h4">{stats.currentStreak}</Typography>
-                        <Typography variant="body2">Current Streak</Typography>
-                      </Paper>
-                    </Grid>
-                    <Grid item xs={6} sm={3}>
-                      <Paper
-                        elevation={2}
-                        sx={{
-                          p: 2,
-                          textAlign: 'center',
-                          borderRadius: 2,
-                          background: 'linear-gradient(45deg, #9C27B0 30%, #BA68C8 90%)',
-                          color: 'white',
-                        }}
-                      >
-                        <Typography variant="h4">{stats.longestStreak}</Typography>
-                        <Typography variant="body2">Longest Streak</Typography>
-                      </Paper>
-                    </Grid>
-                  </Grid>
-                </Paper>
-
-                <Box sx={{ mt: 3 }}>
-                  <Paper
-                    elevation={3}
-                    sx={{
-                      p: 3,
-                      borderRadius: 2,
-                      background: 'linear-gradient(145deg, #ffffff, #f5f5f5)',
-                    }}
-                  >
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-                      <Typography variant="h6">Account Settings</Typography>
-                      <Button
-                        startIcon={<EditIcon />}
-                        onClick={() => setEditMode(!editMode)}
-                        variant="outlined"
-                      >
-                        {editMode ? 'Cancel' : 'Edit Profile'}
-                      </Button>
-                    </Box>
-
-                    <form onSubmit={handleUpdateProfile}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                          <TextField
-                            fullWidth
-                            label="Username"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleInputChange}
-                            disabled={!editMode}
-                            InputProps={{
-                              startAdornment: <PersonIcon sx={{ mr: 1, color: 'action.active' }} />,
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <TextField
-                            fullWidth
-                            label="Email"
-                            name="email"
-                            value={formData.email}
-                            onChange={handleInputChange}
-                            disabled={!editMode}
-                            InputProps={{
-                              startAdornment: <EmailIcon sx={{ mr: 1, color: 'action.active' }} />,
-                            }}
-                          />
-                        </Grid>
-                        {editMode && (
-                          <Grid item xs={12}>
-                            <Button
-                              type="submit"
-                              variant="contained"
-                              color="primary"
-                              fullWidth
-                              disabled={loading}
-                            >
-                              Save Changes
-                            </Button>
-                          </Grid>
-                        )}
+                  <Typography variant="h6" gutterBottom>
+                    Profile Information
+                  </Typography>
+                  <form onSubmit={handleUpdateProfile}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Username"
+                          name="username"
+                          value={formData.username}
+                          onChange={handleInputChange}
+                          disabled={!editMode}
+                          InputProps={{
+                            startAdornment: (
+                              <PersonIcon color="action" sx={{ mr: 1 }} />
+                            ),
+                          }}
+                        />
                       </Grid>
-                    </form>
-
-                    <Divider sx={{ my: 3 }} />
-
-                    <Typography variant="h6" gutterBottom>
-                      Change Password
-                    </Typography>
-                    <form onSubmit={handleChangePassword}>
-                      <Grid container spacing={2}>
-                        <Grid item xs={12}>
-                          <TextField
-                            fullWidth
-                            label="Current Password"
-                            name="currentPassword"
-                            type="password"
-                            value={formData.currentPassword}
-                            onChange={handleInputChange}
-                            InputProps={{
-                              startAdornment: <LockIcon sx={{ mr: 1, color: 'action.active' }} />,
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <TextField
-                            fullWidth
-                            label="New Password"
-                            name="newPassword"
-                            type="password"
-                            value={formData.newPassword}
-                            onChange={handleInputChange}
-                            InputProps={{
-                              startAdornment: <LockIcon sx={{ mr: 1, color: 'action.active' }} />,
-                            }}
-                          />
-                        </Grid>
-                        <Grid item xs={12}>
-                          <TextField
-                            fullWidth
-                            label="Confirm New Password"
-                            name="confirmPassword"
-                            type="password"
-                            value={formData.confirmPassword}
-                            onChange={handleInputChange}
-                            InputProps={{
-                              startAdornment: <LockIcon sx={{ mr: 1, color: 'action.active' }} />,
-                            }}
-                          />
-                        </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Email"
+                          name="email"
+                          value={formData.email}
+                          onChange={handleInputChange}
+                          disabled={!editMode}
+                          InputProps={{
+                            startAdornment: (
+                              <EmailIcon color="action" sx={{ mr: 1 }} />
+                            ),
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Member Since"
+                          value={formatDate(userData?.createdAt)}
+                          disabled
+                          InputProps={{
+                            startAdornment: (
+                              <CalendarIcon color="action" sx={{ mr: 1 }} />
+                            ),
+                          }}
+                        />
+                      </Grid>
+                      {editMode && (
                         <Grid item xs={12}>
                           <Button
                             type="submit"
@@ -439,58 +363,116 @@ const ProfilePopup = ({ open, onClose }) => {
                             fullWidth
                             disabled={loading}
                           >
-                            Change Password
+                            {loading ? <CircularProgress size={24} /> : 'Save Changes'}
                           </Button>
                         </Grid>
+                      )}
+                    </Grid>
+                  </form>
+                </Paper>
+
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 3,
+                    mt: 3,
+                    borderRadius: 2,
+                    backgroundColor: isDarkMode ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.02)',
+                  }}
+                >
+                  <Typography variant="h6" gutterBottom>
+                    Change Password
+                  </Typography>
+                  <form onSubmit={handleChangePassword}>
+                    <Grid container spacing={2}>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Current Password"
+                          name="currentPassword"
+                          type="password"
+                          value={formData.currentPassword}
+                          onChange={handleInputChange}
+                          InputProps={{
+                            startAdornment: (
+                              <LockIcon color="action" sx={{ mr: 1 }} />
+                            ),
+                          }}
+                        />
                       </Grid>
-                    </form>
-                  </Paper>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="New Password"
+                          name="newPassword"
+                          type="password"
+                          value={formData.newPassword}
+                          onChange={handleInputChange}
+                          InputProps={{
+                            startAdornment: (
+                              <LockIcon color="action" sx={{ mr: 1 }} />
+                            ),
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <TextField
+                          fullWidth
+                          label="Confirm New Password"
+                          name="confirmPassword"
+                          type="password"
+                          value={formData.confirmPassword}
+                          onChange={handleInputChange}
+                          InputProps={{
+                            startAdornment: (
+                              <LockIcon color="action" sx={{ mr: 1 }} />
+                            ),
+                          }}
+                        />
+                      </Grid>
+                      <Grid item xs={12}>
+                        <Button
+                          type="submit"
+                          variant="contained"
+                          color="primary"
+                          fullWidth
+                          disabled={loading}
+                        >
+                          {loading ? <CircularProgress size={24} /> : 'Change Password'}
+                        </Button>
+                      </Grid>
+                    </Grid>
+                  </form>
+                </Paper>
+
+                <Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-end' }}>
+                  <Button
+                    variant="outlined"
+                    color="error"
+                    startIcon={<LogoutIcon />}
+                    onClick={handleLogout}
+                  >
+                    Logout
+                  </Button>
                 </Box>
               </Grid>
             </Grid>
           )}
-
-          <Box sx={{ mt: 4 }}>
-            <Divider sx={{ my: 2 }} />
-            <List>
-              <ListItem 
-                button 
-                onClick={handleLogout}
-                sx={{
-                  color: 'error.main',
-                  '&:hover': {
-                    backgroundColor: 'error.light',
-                    color: 'white',
-                  },
-                }}
-              >
-                <ListItemIcon>
-                  <LogoutIcon color="error" />
-                </ListItemIcon>
-                <ListItemText primary="Logout" />
-              </ListItem>
-            </List>
-          </Box>
         </DialogContent>
       </Dialog>
 
       <Snackbar
-        open={!!success}
+        open={!!success || !!error}
         autoHideDuration={6000}
         onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        <Alert onClose={handleCloseSnackbar} severity="success" sx={{ width: '100%' }}>
-          {success}
-        </Alert>
-      </Snackbar>
-
-      <Snackbar
-        open={!!error}
-        autoHideDuration={6000}
-        onClose={handleCloseSnackbar}
-      >
-        <Alert onClose={handleCloseSnackbar} severity="error" sx={{ width: '100%' }}>
-          {error}
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={success ? 'success' : 'error'}
+          sx={{ width: '100%' }}
+        >
+          {success || error}
         </Alert>
       </Snackbar>
     </>
