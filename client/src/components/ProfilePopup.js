@@ -31,13 +31,11 @@ import {
   CheckCircle as CheckCircleIcon,
   Logout as LogoutIcon,
 } from '@mui/icons-material';
-import { motion } from 'framer-motion';
+
 import api from '../config/api';
 import { format, parseISO } from 'date-fns';
 import { useAuth } from '../contexts/AuthContext';
 import { useTheme as useAppTheme } from '../contexts/ThemeContext';
-
-const MotionBox = motion(Box);
 
 const ProfilePopup = ({ open, onClose }) => {
   const { logout } = useAuth();

@@ -22,13 +22,13 @@ import {
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  FilterList as FilterListIcon,
-  Sort as SortIcon,
+  
+  
   Add as AddIcon,
-  Notifications as NotificationsIcon,
+  
 } from '@mui/icons-material';
 import { AnimatePresence } from 'framer-motion';
-import { format, isToday, isSameDay, isBefore, isAfter, addMinutes, subMinutes } from 'date-fns';
+import {  isSameDay, isBefore, isAfter,  subMinutes } from 'date-fns';
 import api from '../config/api';
 import HabitCard from './HabitCard';
 import HabitForm from './HabitForm';
@@ -199,9 +199,12 @@ const HabitList = () => {
     result.sort((a, b) => {
       let comparison = 0;
       switch (sortBy) {
+        case 'createdAt':
+          return new Date(a.createdAt) - new Date(b.createdAt);
         case 'title':
-          comparison = a.title.localeCompare(b.title);
-          break;
+          return a.title.localeCompare(b.title);
+        case 'category':
+          return a.category.localeCompare(b.category);
         case 'streak':
           comparison = (a.streak || 0) - (b.streak || 0);
           break;
@@ -218,10 +221,8 @@ const HabitList = () => {
           bStart.setHours(new Date(b.startTime).getHours(), new Date(b.startTime).getMinutes(), 0, 0);
           comparison = aStart - bStart;
           break;
-        case 'createdAt':
         default:
-          comparison = new Date(b.createdAt) - new Date(a.createdAt);
-          break;
+          return 0;
       }
       return sortOrder === 'desc' ? -comparison : comparison;
     });
@@ -253,7 +254,7 @@ const HabitList = () => {
         // Handle specific error codes
         switch (code) {
           case 'MISSING_FIELDS':
-            errorMessage = `Please fill in all required fields: ${details}`;
+            errorMessage = `Please fill in all required fields: ${details || 'unknown fields'}`;
             break;
           case 'INVALID_CATEGORY':
             errorMessage = 'Please select a valid category';
@@ -271,6 +272,9 @@ const HabitList = () => {
           case 'INVALID_START_TIME':
           case 'INVALID_END_TIME':
             errorMessage = 'Please enter a valid time in HH:mm format';
+            break;
+          default:
+            errorMessage = message || 'An error occurred';
             break;
         }
       }
@@ -305,7 +309,7 @@ const HabitList = () => {
       let errorMessage = 'Failed to update habit. Please try again.';
       
       if (err.response?.data) {
-        const { message, code, details } = err.response.data;
+        const { message, code } = err.response.data;
         errorMessage = message;
         
         // Handle specific error codes
@@ -326,6 +330,9 @@ const HabitList = () => {
           case 'INVALID_START_TIME':
           case 'INVALID_END_TIME':
             errorMessage = 'Please enter a valid time in HH:mm format';
+            break;
+          default:
+            errorMessage = message || 'An error occurred';
             break;
         }
       }
@@ -414,6 +421,25 @@ const HabitList = () => {
     }
   };
 
+  const handleSortChange = (event) => {
+    const value = event.target.value;
+    setSortBy(value);
+    switch (value) {
+      case 'title':
+        setSortOrder('asc');
+        break;
+      case 'createdAt':
+        setSortOrder('desc');
+        break;
+      case 'priority':
+        setSortOrder('desc');
+        break;
+      default:
+        setSortOrder('desc');
+        break;
+    }
+  };
+
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -478,7 +504,7 @@ const HabitList = () => {
               <InputLabel>Sort By</InputLabel>
               <Select
                 value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
+                onChange={handleSortChange}
                 label="Sort By"
               >
                 <MenuItem value="createdAt">Date Created</MenuItem>

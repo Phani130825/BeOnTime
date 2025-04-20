@@ -28,7 +28,7 @@ import {
   Legend,
 } from 'chart.js';
 import api from '../config/api';
-import { useAuth } from '../contexts/AuthContext';
+
 import { format, subDays, parseISO } from 'date-fns';
 
 // Register ChartJS components
@@ -43,7 +43,7 @@ ChartJS.register(
 );
 
 const StatCard = ({ icon, value, label, color }) => {
-  const theme = useTheme();
+  
   
   return (
     <Card sx={{ height: '100%', bgcolor: 'background.paper' }}>
@@ -64,7 +64,6 @@ const StatCard = ({ icon, value, label, color }) => {
 
 const Overview = () => {
   const theme = useTheme();
-  const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);

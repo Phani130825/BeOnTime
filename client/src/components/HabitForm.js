@@ -37,10 +37,8 @@ import { TimePicker } from '@mui/x-date-pickers/TimePicker';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { motion } from 'framer-motion';
-import { format } from 'date-fns';
 
-const MotionBox = motion(Box);
+import { format } from 'date-fns';
 
 const predefinedHabits = [
   {
@@ -206,65 +204,34 @@ const HabitForm = ({ open, onClose, onSave, habit = null }) => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
   const handleReminderChange = (e) => {
+    const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
       notifications: {
         ...prev.notifications,
-        enabled: e.target.checked,
-      },
+        [name]: value
+      }
     }));
-  };
-
-  const handleTimeChange = (field) => (newValue) => {
-    setFormData({
-      ...formData,
-      [field]: newValue,
-    });
   };
 
   const handleStartDateChange = (newValue) => {
-    setFormData({
-      ...formData,
-      startDate: newValue,
-    });
+    setFormData(prev => ({ ...prev, startDate: newValue }));
   };
 
   const handleStartTimeChange = (newValue) => {
-    setFormData({
-      ...formData,
-      startTime: newValue,
-    });
+    setFormData(prev => ({ ...prev, startTime: newValue }));
   };
 
   const handleEndDateChange = (newValue) => {
-    setFormData({
-      ...formData,
-      endDate: newValue,
-    });
+    setFormData(prev => ({ ...prev, endDate: newValue }));
   };
 
   const handleEndTimeChange = (newValue) => {
-    setFormData({
-      ...formData,
-      endTime: newValue,
-    });
-  };
-
-  const handleNotificationChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      notifications: {
-        ...prev.notifications,
-        [field]: value
-      }
-    }));
+    setFormData(prev => ({ ...prev, endTime: newValue }));
   };
 
   const handleAddTag = () => {
@@ -543,7 +510,7 @@ const HabitForm = ({ open, onClose, onSave, habit = null }) => {
                 <TimePicker
                   label="Reminder Time"
                   value={formData.notifications.time}
-                  onChange={(newValue) => handleNotificationChange('time', newValue)}
+                  onChange={(newValue) => handleReminderChange('time', newValue)}
                   renderInput={(params) => <TextField {...params} fullWidth />}
                 />
               )}
@@ -660,7 +627,7 @@ const HabitForm = ({ open, onClose, onSave, habit = null }) => {
                   control={
                     <Switch
                       checked={formData.notifications.enabled}
-                      onChange={(e) => handleNotificationChange('enabled', e.target.checked)}
+                      onChange={(e) => handleReminderChange('enabled', e.target.checked)}
                     />
                   }
                   label="Notify at start time"
@@ -671,7 +638,7 @@ const HabitForm = ({ open, onClose, onSave, habit = null }) => {
                   control={
                     <Switch
                       checked={formData.notifications.endEnabled}
-                      onChange={(e) => handleNotificationChange('endEnabled', e.target.checked)}
+                      onChange={(e) => handleReminderChange('endEnabled', e.target.checked)}
                     />
                   }
                   label="Notify before end time"
@@ -685,7 +652,7 @@ const HabitForm = ({ open, onClose, onSave, habit = null }) => {
                       type="number"
                       size="small"
                       value={formData.notifications.endReminderMinutes}
-                      onChange={(e) => handleNotificationChange('endReminderMinutes', parseInt(e.target.value) || 5)}
+                      onChange={(e) => handleReminderChange('endReminderMinutes', parseInt(e.target.value) || 5)}
                       inputProps={{ min: 1, max: 60 }}
                       sx={{ width: 80 }}
                     />

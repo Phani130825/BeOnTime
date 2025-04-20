@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -9,7 +9,6 @@ import {
   MenuItem,
   FormControl,
   InputLabel,
-  Divider,
   IconButton,
   Tooltip,
   Snackbar,
@@ -32,11 +31,7 @@ const Settings = () => {
     severity: 'success',
   });
 
-  useEffect(() => {
-    fetchNotificationPreferences();
-  }, []);
-
-  const fetchNotificationPreferences = async () => {
+  const fetchNotificationPreferences = useCallback(async () => {
     try {
       const response = await api.get('/api/notifications/preferences');
       setSettings(prev => ({
@@ -47,7 +42,11 @@ const Settings = () => {
       console.error('Error fetching notification preferences:', error);
       showSnackbar('Error loading notification preferences', 'error');
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchNotificationPreferences();
+  }, [fetchNotificationPreferences]);
 
   const showSnackbar = (message, severity = 'success') => {
     setSnackbar({

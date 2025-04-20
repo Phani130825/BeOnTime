@@ -7,8 +7,6 @@ import {
   Box,
   Menu,
   MenuItem,
-  Divider,
-  Typography,
   ListItemIcon,
   Button,
   Tooltip,
@@ -16,7 +14,6 @@ import {
 import {
   Menu as MenuIcon,
   Logout as LogoutIcon,
-  Settings as SettingsIcon,
   LightMode as SunIcon,
   DarkMode as MoonIcon,
 } from '@mui/icons-material';

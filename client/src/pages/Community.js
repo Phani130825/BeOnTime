@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
-  Paper,
+
   Grid,
   Card,
   CardContent,
@@ -30,7 +30,7 @@ import {
 } from '@mui/material';
 import { styled } from '@mui/material/styles';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
+
 import DeleteIcon from '@mui/icons-material/Delete';
 import AssignmentIcon from '@mui/icons-material/Assignment';
 import api from '../config/api';
@@ -198,16 +198,6 @@ const Community = () => {
     } catch (err) {
       console.error('Error deleting admin habit:', err);
       setError(err.response?.data?.message || 'Failed to delete admin habit');
-    }
-  };
-
-  const handleUpdateAdminHabit = async (habitId, updatedHabit) => {
-    try {
-      await api.put(`/api/communities/${selectedCommunity._id}/admin-habits/${habitId}`, updatedHabit);
-      fetchData();
-    } catch (err) {
-      console.error('Error updating admin habit:', err);
-      setError(err.response?.data?.message || 'Failed to update admin habit');
     }
   };
 

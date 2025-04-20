@@ -30,11 +30,10 @@ import {
   EmojiEvents as TrophyIcon,
   CalendarToday as CalendarIcon,
   Notifications as NotificationsIcon,
-  NotificationsOff as NotificationsOffIcon,
   NoteAdd as NoteAddIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import { format, isToday, isSameDay } from 'date-fns';
+import { format, isToday } from 'date-fns';
 
 const MotionCard = motion(Card);
 

@@ -8,11 +8,11 @@ import {
   TextField,
   Button,
   Avatar,
-  Divider,
+
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { Line } from 'react-chartjs-2';
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -37,7 +37,7 @@ ChartJS.register(
 );
 
 const Profile = () => {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
