@@ -15,6 +15,10 @@ import {
   CircularProgress,
   Alert,
   Snackbar,
+  List,
+  ListItem,
+  ListItemIcon,
+  ListItemText,
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -24,14 +28,17 @@ import {
   Email as EmailIcon,
   CalendarToday as CalendarIcon,
   CheckCircle as CheckCircleIcon,
+  Logout as LogoutIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
 import api from '../config/api';
 import { format, parseISO } from 'date-fns';
+import { useAuth } from '../contexts/AuthContext';
 
 const MotionBox = motion(Box);
 
 const ProfilePopup = ({ open, onClose }) => {
+  const { logout } = useAuth();
   const [userData, setUserData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -163,6 +170,11 @@ const ProfilePopup = ({ open, onClose }) => {
       console.error('Error formatting date:', err);
       return 'N/A';
     }
+  };
+
+  const handleLogout = () => {
+    logout();
+    onClose();
   };
 
   return (
@@ -437,6 +449,28 @@ const ProfilePopup = ({ open, onClose }) => {
               </Grid>
             </Grid>
           )}
+
+          <Box sx={{ mt: 4 }}>
+            <Divider sx={{ my: 2 }} />
+            <List>
+              <ListItem 
+                button 
+                onClick={handleLogout}
+                sx={{
+                  color: 'error.main',
+                  '&:hover': {
+                    backgroundColor: 'error.light',
+                    color: 'white',
+                  },
+                }}
+              >
+                <ListItemIcon>
+                  <LogoutIcon color="error" />
+                </ListItemIcon>
+                <ListItemText primary="Logout" />
+              </ListItem>
+            </List>
+          </Box>
         </DialogContent>
       </Dialog>
 

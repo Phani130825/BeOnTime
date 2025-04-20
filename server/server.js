@@ -5,6 +5,7 @@ const habitRoutes = require('./routes/habits');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/auth');
 const notificationRoutes = require('./routes/notificationRoutes');
+const statsRoutes = require('./routes/stats');
 
 const app = express();
 
@@ -22,6 +23,7 @@ app.use('/api/habits', habitRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/stats', statsRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
