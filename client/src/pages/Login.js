@@ -8,6 +8,7 @@ import {
   Button,
   Link,
   Alert,
+  CircularProgress,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -27,14 +28,15 @@ const Login = () => {
       await login(email, password);
       navigate('/dashboard');
     } catch (error) {
-      setError(error.message || 'Failed to login');
+      console.error('Login error:', error);
+      setError(error.message || 'Failed to login. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <Container maxWidth="xs">
+    <Container maxWidth="sm">
       <Box
         sx={{
           marginTop: 8,
@@ -83,7 +85,7 @@ const Login = () => {
             sx={{ mt: 3, mb: 2 }}
             disabled={loading}
           >
-            Sign In
+            {loading ? <CircularProgress size={24} /> : 'Sign In'}
           </Button>
           <Box sx={{ textAlign: 'center' }}>
             <Link component={RouterLink} to="/register" variant="body2">

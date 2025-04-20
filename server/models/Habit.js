@@ -35,21 +35,44 @@ const habitSchema = new mongoose.Schema({
         required: true
     },
     startTime: {
-        type: String
+        type: String,
+        validate: {
+            validator: function(v) {
+                return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v);
+            },
+            message: props => `${props.value} is not a valid time format! Use HH:mm format.`
+        }
     },
     endDate: {
         type: Date
     },
     endTime: {
-        type: String
+        type: String,
+        validate: {
+            validator: function(v) {
+                return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v);
+            },
+            message: props => `${props.value} is not a valid time format! Use HH:mm format.`
+        }
     },
     notifications: {
         enabled: {
             type: Boolean,
             default: true
         },
-        time: {
-            type: String
+        startEnabled: {
+            type: Boolean,
+            default: true
+        },
+        endEnabled: {
+            type: Boolean,
+            default: true
+        },
+        endReminderMinutes: {
+            type: Number,
+            default: 5,
+            min: 1,
+            max: 60
         }
     },
     streak: {
@@ -184,6 +207,11 @@ habitSchema.methods.updateStreak = function() {
         this.streakGoal = currentStreak;
     }
 };
+
+// Index for faster queries
+habitSchema.index({ user: 1, startDate: 1 });
+habitSchema.index({ user: 1, completed: 1 });
+habitSchema.index({ user: 1, 'notifications.enabled': 1 });
 
 const Habit = mongoose.model('Habit', habitSchema);
 

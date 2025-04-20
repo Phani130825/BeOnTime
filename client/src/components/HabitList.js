@@ -54,12 +54,34 @@ const HabitList = () => {
   const fetchHabits = async () => {
     try {
       setLoading(true);
+      const token = localStorage.getItem('token');
+      if (!token) {
+        throw new Error('No authentication token found');
+      }
+      
       const response = await api.get('/api/habits');
+      if (!response.data) {
+        throw new Error('No data received from server');
+      }
+      
       setHabits(response.data);
       setError(null);
     } catch (err) {
-      setError('Failed to fetch habits. Please try again later.');
       console.error('Error fetching habits:', err);
+      console.error('Error details:', {
+        message: err.message,
+        response: err.response?.data,
+        status: err.response?.status
+      });
+      
+      let errorMessage = 'Failed to fetch habits. Please try again later.';
+      if (err.response?.status === 401) {
+        errorMessage = 'Please login again to continue';
+      } else if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

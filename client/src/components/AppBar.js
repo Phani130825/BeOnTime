@@ -9,15 +9,18 @@ import {
   MenuItem,
   Divider,
   Typography,
+  ListItemIcon,
+  Button,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   Logout as LogoutIcon,
   Settings as SettingsIcon,
 } from '@mui/icons-material';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import ProfilePopup from './ProfilePopup';
+import NotificationIcon from './NotificationIcon';
 
 const AppBar = () => {
   const [profileOpen, setProfileOpen] = useState(false);
@@ -49,71 +52,78 @@ const AppBar = () => {
       <MuiAppBar position="fixed">
         <Toolbar>
           <IconButton
-            color="inherit"
-            aria-label="open drawer"
             edge="start"
-            sx={{ mr: 2 }}
+            color="inherit"
+            aria-label="menu"
+            onClick={handleMenuOpen}
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            BeOnTime
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center' }}>
-            <IconButton
-              onClick={handleMenuOpen}
-              sx={{ p: 0 }}
-            >
-              <Avatar
-                sx={{
-                  width: 40,
-                  height: 40,
-                  background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+
+          <Box sx={{ flexGrow: 1 }} />
+
+          {user ? (
+            <>
+              <NotificationIcon />
+              <IconButton
+                color="inherit"
+                onClick={handleProfileClick}
+                sx={{ ml: 1 }}
+              >
+                <Avatar
+                  src={user.profilePicture}
+                  alt={user.username}
+                  sx={{ width: 32, height: 32 }}
+                >
+                  {user.username?.charAt(0).toUpperCase() || 'U'}
+                </Avatar>
+              </IconButton>
+
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                PaperProps={{
+                  sx: {
+                    mt: 1.5,
+                    minWidth: 180,
+                    borderRadius: 2,
+                    boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                  },
                 }}
               >
-                {user?.username?.charAt(0).toUpperCase() || 'U'}
-              </Avatar>
-            </IconButton>
-          </Box>
+                <MenuItem onClick={handleLogout}>
+                  <ListItemIcon>
+                    <LogoutIcon fontSize="small" />
+                  </ListItemIcon>
+                  Logout
+                </MenuItem>
+              </Menu>
+            </>
+          ) : (
+            <Box sx={{ display: 'flex', gap: 1 }}>
+              <Button
+                component={RouterLink}
+                to="/login"
+                variant="outlined"
+                color="inherit"
+              >
+                Login
+              </Button>
+              <Button
+                component={RouterLink}
+                to="/register"
+                variant="contained"
+                color="primary"
+              >
+                Sign Up
+              </Button>
+            </Box>
+          )}
         </Toolbar>
       </MuiAppBar>
 
-      <Menu
-        anchorEl={anchorEl}
-        open={Boolean(anchorEl)}
-        onClose={handleMenuClose}
-        onClick={handleMenuClose}
-        transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-        anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
-      >
-        <MenuItem onClick={handleProfileClick}>
-          <Avatar
-            sx={{
-              width: 24,
-              height: 24,
-              mr: 1,
-              background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
-            }}
-          >
-            {user?.username?.charAt(0).toUpperCase() || 'U'}
-          </Avatar>
-          Profile
-        </MenuItem>
-        <MenuItem onClick={() => navigate('/settings')}>
-          <SettingsIcon sx={{ mr: 1 }} />
-          Settings
-        </MenuItem>
-        <Divider />
-        <MenuItem onClick={handleLogout}>
-          <LogoutIcon sx={{ mr: 1 }} />
-          Logout
-        </MenuItem>
-      </Menu>
-
-      <ProfilePopup
-        open={profileOpen}
-        onClose={() => setProfileOpen(false)}
-      />
+      <ProfilePopup open={profileOpen} onClose={() => setProfileOpen(false)} />
     </>
   );
 };

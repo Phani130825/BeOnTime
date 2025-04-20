@@ -5,6 +5,8 @@ const habitRoutes = require('./routes/habits');
 const challengeRoutes = require('./routes/challenges');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/auth');
+const notificationRoutes = require('./routes/notificationRoutes');
+const scheduler = require('./services/scheduler');
 require('dotenv').config();
 
 const app = express();
@@ -15,11 +17,13 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // Connect to MongoDB
-mongoose.connect(process.env.MONGODB_URI, {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/beontime', {
   useNewUrlParser: true,
   useUnifiedTopology: true
 }).then(() => {
   console.log('Connected to MongoDB');
+  // Start the scheduler
+  scheduler.start();
 }).catch((error) => {
   console.error('MongoDB connection error:', error);
 });
@@ -29,6 +33,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/habits', habitRoutes);
 app.use('/api/challenges', challengeRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

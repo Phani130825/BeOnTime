@@ -4,6 +4,7 @@ const jwt = require('jsonwebtoken');
 const Habit = require('../models/Habit');
 const User = require('../models/User');
 const auth = require('../middleware/auth');
+const habitController = require('../controllers/habitController');
 
 // Middleware to verify JWT token
 const authMiddleware = async (req, res, next) => {
@@ -25,52 +26,51 @@ const authMiddleware = async (req, res, next) => {
 router.post('/', auth, async (req, res) => {
     try {
         // Validate required fields
-        const requiredFields = ['title', 'category', 'frequency', 'targetDays', 'startDate'];
-        const missingFields = requiredFields.filter(field => !req.body[field]);
-        
-        if (missingFields.length > 0) {
+        const { title, category, frequency, targetDays, startDate } = req.body;
+        if (!title || !category || !frequency || !targetDays || !startDate) {
             return res.status(400).json({ 
-                message: `Missing required fields: ${missingFields.join(', ')}`,
-                code: 'MISSING_FIELDS'
+                message: 'Missing required fields',
+                code: 'MISSING_FIELDS',
+                details: ['title', 'category', 'frequency', 'targetDays', 'startDate'].filter(field => !req.body[field])
             });
         }
 
         // Validate category
         const validCategories = ['Health', 'Productivity', 'Self-Care', 'Learning', 'Other'];
-        if (!validCategories.includes(req.body.category)) {
+        if (!validCategories.includes(category)) {
             return res.status(400).json({ 
-                message: `Invalid category. Must be one of: ${validCategories.join(', ')}`,
+                message: 'Invalid category',
                 code: 'INVALID_CATEGORY'
             });
         }
 
         // Validate frequency
         const validFrequencies = ['Daily', 'Weekly', 'Monthly'];
-        if (!validFrequencies.includes(req.body.frequency)) {
+        if (!validFrequencies.includes(frequency)) {
             return res.status(400).json({ 
-                message: `Invalid frequency. Must be one of: ${validFrequencies.join(', ')}`,
+                message: 'Invalid frequency',
                 code: 'INVALID_FREQUENCY'
             });
         }
 
-        // Validate targetDays
-        if (req.body.targetDays < 1) {
+        // Validate target days
+        if (targetDays < 1) {
             return res.status(400).json({ 
                 message: 'Target days must be at least 1',
                 code: 'INVALID_TARGET_DAYS'
             });
         }
 
-        // Format dates
-        const startDate = new Date(req.body.startDate);
-        if (isNaN(startDate.getTime())) {
+        // Validate dates
+        const startDateObj = new Date(startDate);
+        if (isNaN(startDateObj.getTime())) {
             return res.status(400).json({ 
                 message: 'Invalid start date format. Expected format: YYYY-MM-DD',
                 code: 'INVALID_START_DATE'
             });
         }
 
-        const endDate = req.body.endDate ? new Date(req.body.endDate) : undefined;
+        const endDate = req.body.endDate ? new Date(req.body.endDate) : null;
         if (endDate && isNaN(endDate.getTime())) {
             return res.status(400).json({ 
                 message: 'Invalid end date format. Expected format: YYYY-MM-DD',
@@ -94,30 +94,8 @@ router.post('/', auth, async (req, res) => {
             });
         }
 
-        // Create habit data
-        const habitData = {
-            ...req.body,
-            user: req.user._id,
-            startDate,
-            endDate,
-            startTime: req.body.startTime || null,
-            endTime: req.body.endTime || null,
-            notifications: {
-                enabled: req.body.notifications?.enabled ?? true,
-                time: req.body.notifications?.time || null
-            },
-            tags: req.body.tags || [],
-            streakGoal: req.body.streakGoal || 30,
-            notes: Array.isArray(req.body.notes) ? req.body.notes : [req.body.notes].filter(Boolean),
-            completionHistory: [],
-            streak: 0,
-            progress: 0,
-            completed: false
-        };
-
-        const habit = new Habit(habitData);
-        await habit.save();
-        res.status(201).json(habit);
+        // Use the controller function to create the habit
+        return habitController.createHabit(req, res);
     } catch (error) {
         console.error('Error creating habit:', error);
         res.status(400).json({ 

@@ -4,6 +4,7 @@ const connectDB = require('./config/db');
 const habitRoutes = require('./routes/habits');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/auth');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 const app = express();
 
@@ -20,6 +21,7 @@ connectDB().catch(err => {
 app.use('/api/habits', habitRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/auth', authRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {

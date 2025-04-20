@@ -24,36 +24,32 @@ yarn-error.log*
 logs
 *.log
 
-# Editor directories and files
+# IDE and editor files
 .idea/
 .vscode/
-*.suo
-*.ntvs*
-*.njsproj
-*.sln
-*.sw?
-
-# OS generated files
+*.swp
+*.swo
 .DS_Store
-.DS_Store?
-._*
-.Spotlight-V100
-.Trashes
-ehthumbs.db
 Thumbs.db
 
 # MongoDB
+/data/db
 *.mongodb
-/data/db/
 
-# Cache directories
-.npm
+# Debug
+.debug/
+
+# Temporary files
+*.tmp
+*.temp
+.temp/
+tmp/
+temp/
+
+# Cache
+.cache/
+.npm/
 .eslintcache
-.stylelintcache
-.rpt2_cache/
-.rts2_cache_cjs/
-.rts2_cache_es/
-.rts2_cache_umd/
 
 # Optional npm cache directory
 .npm
@@ -72,61 +68,21 @@ Thumbs.db
 
 # dotenv environment variables file
 .env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
 
-# next.js build output
-.next
+# Server specific
+server/uploads/
+server/public/uploads/
+server/logs/
 
-# Temporary files
-*.tmp
-*.temp
-*.swp
-*~
+# Client specific
+client/.env
+client/build/
+client/dist/
 
-# Debug files
-*.pid
-*.seed
-*.pid.lock
-
-# Package directories
-jspm_packages/
-
-# TypeScript v1 declaration files
-typings/
-
-# Optional npm cache directory
-.npm
-
-# Optional eslint cache
-.eslintcache
-
-# Optional REPL history
-.node_repl_history
-
-# Output of 'npm pack'
-*.tgz
-
-# Yarn Integrity file
-.yarn-integrity
-
-# dotenv environment variables file
-.env
-
-# next.js build output
-.next
-
-# Temporary files
-*.tmp
-*.temp
-*.swp
-*~
-
-# Debug files
-*.pid
-*.seed
-*.pid.lock
-
-# Package directories
-jspm_packages/
-
-# TypeScript v1 declaration files
-typings/ 
+# System Files
+.DS_Store
+Thumbs.db 
