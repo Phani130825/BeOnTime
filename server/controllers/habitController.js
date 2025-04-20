@@ -100,7 +100,7 @@ exports.deleteHabit = async (req, res) => {
 // Get all habits for a user
 exports.getHabits = async (req, res) => {
     try {
-        const habits = await Habit.find({ user: req.user._id });
+        const habits = await Habit.find({ user: req.user._id }).select('title description startDate endDate startTime endTime completionHistory streak progress category');
         res.json(habits);
     } catch (error) {
         console.error('Error fetching habits:', error);

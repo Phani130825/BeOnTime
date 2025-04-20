@@ -11,6 +11,7 @@ import Overview from './pages/Overview';
 import Community from './pages/Community';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
+import Calendar from './pages/Calendar';
 
 // Components
 import CustomAppBar from './components/AppBar';
@@ -57,6 +58,14 @@ const AppContent = () => {
             element={
               <ProtectedRoute>
                 <Overview />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/calendar"
+            element={
+              <ProtectedRoute>
+                <Calendar />
               </ProtectedRoute>
             }
           />
