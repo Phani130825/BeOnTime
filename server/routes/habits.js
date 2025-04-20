@@ -291,70 +291,8 @@ router.delete('/:id', auth, async (req, res) => {
     }
 });
 
-// Mark habit as completed for today
-router.post('/:id/complete', auth, async (req, res) => {
-    try {
-        const habit = await Habit.findOne({ _id: req.params.id, user: req.user._id });
-        if (!habit) {
-            return res.status(404).json({ message: 'Habit not found' });
-        }
-
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-        // Initialize streak if it doesn't exist
-        if (!habit.streak) {
-            habit.streak = 0;
-        }
-
-        // Initialize completionHistory if it doesn't exist
-        if (!habit.completionHistory) {
-            habit.completionHistory = [];
-        }
-
-        // Check if already completed today
-        const alreadyCompleted = habit.completionHistory.some(entry => 
-            entry.date.toDateString() === today.toDateString() && entry.completed
-        );
-
-        if (alreadyCompleted) {
-            return res.status(400).json({ 
-                message: 'Habit already completed today',
-                code: 'ALREADY_COMPLETED'
-            });
-        }
-
-        // Add completion for today
-        habit.completionHistory.push({
-            date: today,
-            completed: true
-        });
-
-        // Update streak
-        const yesterday = new Date(today);
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        const completedYesterday = habit.completionHistory.some(entry => 
-            entry.date.toDateString() === yesterday.toDateString() && entry.completed
-        );
-
-        if (completedYesterday) {
-            habit.streak += 1;
-        } else {
-            habit.streak = 1;
-        }
-
-        // Update progress
-        const totalDays = habit.completionHistory.length;
-        const completedDays = habit.completionHistory.filter(entry => entry.completed).length;
-        habit.progress = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
-
-        await habit.save();
-        res.json(habit);
-    } catch (error) {
-        res.status(500).json({ message: error.message });
-    }
-});
+// Mark habit as completed
+router.post('/:id/complete', auth, habitController.completeHabit);
 
 // Add a note to a habit
 router.post('/:id/notes', auth, async (req, res) => {

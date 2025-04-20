@@ -1,6 +1,38 @@
 const Habit = require('../models/Habit');
 const Notification = require('../models/Notification');
 
+// Helper function to format time ago
+const formatTimeAgo = (date) => {
+    const seconds = Math.floor((new Date() - date) / 1000);
+    let interval = seconds / 31536000;
+
+    if (interval > 1) return Math.floor(interval) + ' years ago';
+    interval = seconds / 2592000;
+    if (interval > 1) return Math.floor(interval) + ' months ago';
+    interval = seconds / 86400;
+    if (interval > 1) return Math.floor(interval) + ' days ago';
+    interval = seconds / 3600;
+    if (interval > 1) return Math.floor(interval) + ' hours ago';
+    interval = seconds / 60;
+    if (interval > 1) return Math.floor(interval) + ' minutes ago';
+    return Math.floor(seconds) + ' seconds ago';
+};
+
+// Helper function to get notification type
+const getNotificationType = (type) => {
+    switch (type) {
+        case 'habit_start':
+        case 'habit_end':
+            return 'warning';
+        case 'streak_achievement':
+            return 'success';
+        case 'habit_completion':
+            return 'info';
+        default:
+            return 'info';
+    }
+};
+
 // Get user statistics
 exports.getUserStats = async (req, res) => {
     try {
@@ -110,36 +142,4 @@ exports.getUserStats = async (req, res) => {
         console.error('Error getting user stats:', error);
         res.status(500).json({ message: 'Error fetching statistics' });
     }
-};
-
-// Helper function to format time ago
-function formatTimeAgo(date) {
-    const seconds = Math.floor((new Date() - date) / 1000);
-    let interval = seconds / 31536000;
-
-    if (interval > 1) return Math.floor(interval) + ' years ago';
-    interval = seconds / 2592000;
-    if (interval > 1) return Math.floor(interval) + ' months ago';
-    interval = seconds / 86400;
-    if (interval > 1) return Math.floor(interval) + ' days ago';
-    interval = seconds / 3600;
-    if (interval > 1) return Math.floor(interval) + ' hours ago';
-    interval = seconds / 60;
-    if (interval > 1) return Math.floor(interval) + ' minutes ago';
-    return Math.floor(seconds) + ' seconds ago';
-}
-
-// Helper function to get notification type
-function getNotificationType(type) {
-    switch (type) {
-        case 'habit_start':
-        case 'habit_end':
-            return 'warning';
-        case 'streak_achievement':
-            return 'success';
-        case 'habit_completion':
-            return 'info';
-        default:
-            return 'info';
-    }
-} 
+}; 

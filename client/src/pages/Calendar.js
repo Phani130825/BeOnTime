@@ -9,16 +9,16 @@ import api from '../config/api';
 import { useAuth } from '../contexts/AuthContext';
 
 const Calendar = () => {
-  const { isAuthenticated, loading: authLoading } = useAuth();
+  const { isAuthenticated, loading: authLoading, user } = useAuth();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthenticated && user) {
       fetchHabits();
     }
-  }, [isAuthenticated]);
+  }, [isAuthenticated, user]);
 
   const fetchHabits = async () => {
     try {
@@ -108,17 +108,19 @@ const Calendar = () => {
   if (error) {
     return (
       <Box sx={{ p: 3 }}>
-        <Alert severity="error">{error}</Alert>
+        <Alert severity="error">
+          {error}
+        </Alert>
       </Box>
     );
   }
 
   return (
     <Box sx={{ p: 3 }}>
-      <Typography variant="h4" gutterBottom>
-        Calendar
-      </Typography>
-      <Paper sx={{ p: 2, mt: 2 }}>
+      <Paper sx={{ p: 2, mb: 2 }}>
+        <Typography variant="h5" gutterBottom>
+          Your Habits Calendar
+        </Typography>
         <FullCalendar
           plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
           initialView="dayGridMonth"
@@ -129,32 +131,9 @@ const Calendar = () => {
           }}
           events={events}
           eventClick={(info) => {
-            // Handle event click (e.g., show habit details)
             console.log('Event clicked:', info.event);
           }}
-          eventContent={(eventInfo) => {
-            return (
-              <div>
-                <b>{eventInfo.event.title}</b>
-                <br />
-                <small>
-                  {format(eventInfo.event.start, 'h:mm a')} - {format(eventInfo.event.end, 'h:mm a')}
-                </small>
-              </div>
-            );
-          }}
           height="auto"
-          aspectRatio={1.8}
-          slotMinTime="00:00:00"
-          slotMaxTime="24:00:00"
-          allDaySlot={false}
-          expandRows={true}
-          stickyHeaderDates={true}
-          nowIndicator={true}
-          dayMaxEvents={true}
-          validRange={{
-            start: new Date().toISOString().split('T')[0]
-          }}
         />
       </Paper>
     </Box>

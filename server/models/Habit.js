@@ -18,21 +18,18 @@ const habitSchema = new mongoose.Schema({
     category: {
         type: String,
         required: true,
-        enum: ['Health', 'Productivity', 'Self-Care', 'Learning', 'Other']
+        enum: ['health', 'fitness', 'learning', 'productivity', 'wellness', 'other', 'self-care'],
+        lowercase: true
     },
     frequency: {
         type: String,
-        required: true,
-        enum: ['Daily', 'Weekly', 'Monthly']
+        enum: ['Daily', 'Weekly', 'Monthly'],
+        required: true
     },
     targetDays: {
         type: Number,
         required: true,
         min: 1
-    },
-    startDate: {
-        type: Date,
-        required: true
     },
     startTime: {
         type: String,
@@ -43,9 +40,6 @@ const habitSchema = new mongoose.Schema({
             message: props => `${props.value} is not a valid time format! Use HH:mm format.`
         }
     },
-    endDate: {
-        type: Date
-    },
     endTime: {
         type: String,
         validate: {
@@ -54,6 +48,21 @@ const habitSchema = new mongoose.Schema({
             },
             message: props => `${props.value} is not a valid time format! Use HH:mm format.`
         }
+    },
+    isChallengeHabit: {
+        type: Boolean,
+        default: false
+    },
+    challenge: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Challenge'
+    },
+    startDate: {
+        type: Date,
+        default: Date.now
+    },
+    endDate: {
+        type: Date
     },
     notifications: {
         enabled: {
@@ -83,12 +92,16 @@ const habitSchema = new mongoose.Schema({
         type: Number,
         default: 30
     },
-    progress: {
-        type: Number,
-        default: 0,
-        min: 0,
-        max: 100
-    },
+    progress: [{
+        date: {
+            type: Date,
+            required: true
+        },
+        completed: {
+            type: Boolean,
+            default: false
+        }
+    }],
     completed: {
         type: Boolean,
         default: false
@@ -206,6 +219,38 @@ habitSchema.methods.updateStreak = function() {
     if (currentStreak > this.streakGoal) {
         this.streakGoal = currentStreak;
     }
+};
+
+// Method to mark habit as completed for a specific date
+habitSchema.methods.markCompleted = async function(date) {
+    const progressIndex = this.progress.findIndex(p => 
+        p.date.toDateString() === date.toDateString()
+    );
+    
+    if (progressIndex === -1) {
+        this.progress.push({ date, completed: true });
+    } else {
+        this.progress[progressIndex].completed = true;
+    }
+    
+    await this.save();
+};
+
+// Method to check if habit is completed for a specific date
+habitSchema.methods.isCompleted = function(date) {
+    const progress = this.progress.find(p => 
+        p.date.toDateString() === date.toDateString()
+    );
+    return progress ? progress.completed : false;
+};
+
+// Method to get completion rate
+habitSchema.methods.getCompletionRate = function() {
+    const totalDays = this.progress.length;
+    if (totalDays === 0) return 0;
+    
+    const completedDays = this.progress.filter(p => p.completed).length;
+    return (completedDays / totalDays) * 100;
 };
 
 // Index for faster queries

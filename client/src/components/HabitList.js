@@ -186,9 +186,12 @@ const HabitList = () => {
     } else if (selectedTab === 2) { // Completed
       result = result.filter(habit => {
         // Check if habit has any completion records for today
-        return habit.completions && habit.completions.some(completion => 
-          isSameDay(new Date(completion.date), now)
-        );
+        if (!habit.completions || !Array.isArray(habit.completions)) return false;
+        return habit.completions.some(completion => {
+          if (!completion || typeof completion !== 'object') return false;
+          const completionDate = new Date(completion.date);
+          return isSameDay(completionDate, now) && completion.completed === true;
+        });
       });
     }
 
@@ -355,17 +358,40 @@ const HabitList = () => {
   const handleCompleteHabit = async (habitId) => {
     try {
       const response = await api.post(`/api/habits/${habitId}/complete`);
-      setHabits(habits.map(habit => 
-        habit._id === habitId ? { ...habit, ...response.data } : habit
-      ));
+      const updatedHabit = response.data;
+      
+      // Update the habits state with the new completion status
+      setHabits(prevHabits => 
+        prevHabits.map(habit => 
+          habit._id === habitId ? {
+            ...habit,
+            ...updatedHabit,
+            streak: updatedHabit.streak || 0,
+            progress: updatedHabit.progress || 0,
+            completions: Array.isArray(updatedHabit.completions) ? updatedHabit.completions : [],
+            completionHistory: Array.isArray(updatedHabit.completionHistory) ? updatedHabit.completionHistory : []
+          } : habit
+        )
+      );
+
+      // Show success notification
       toast.success('Habit completed successfully!');
     } catch (error) {
       console.error('Error completing habit:', error);
+      
+      // Handle specific error cases
       if (error.response?.data?.code === 'ALREADY_COMPLETED') {
         toast.error('You have already completed this habit today');
+      } else if (error.response?.data?.code === 'HABIT_NOT_FOUND') {
+        toast.error('Habit not found. Please refresh the page and try again.');
+      } else if (error.response?.data?.code === 'INVALID_HABIT_STATE') {
+        toast.error('Cannot complete habit at this time. Please check the habit schedule.');
       } else {
-        toast.error(error.response?.data?.message || 'Failed to complete habit');
+        toast.error(error.response?.data?.message || 'Failed to complete habit. Please try again.');
       }
+      
+      // Refresh habits to ensure we have the latest state
+      fetchHabits();
     }
   };
 
@@ -510,13 +536,20 @@ const HabitList = () => {
             {filteredAndSortedHabits.map((habit) => (
               <Grid item xs={12} sm={6} md={4} key={habit._id}>
                 <HabitCard
-                  habit={habit}
+                  habit={{
+                    ...habit,
+                    completions: Array.isArray(habit.completions) 
+                      ? habit.completions.map(completion => ({
+                          ...completion,
+                          date: completion.date ? new Date(completion.date).toISOString() : null,
+                          completed: Boolean(completion.completed)
+                        }))
+                      : []
+                  }}
                   onEdit={handleEditHabit}
                   onDelete={handleDeleteHabit}
                   onComplete={handleCompleteHabit}
                   onAddNote={handleAddNote}
-                  streak={habit.streak || 0}
-                  progress={habit.progress || 0}
                 />
               </Grid>
             ))}

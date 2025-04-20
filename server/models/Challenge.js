@@ -34,6 +34,29 @@ const challengeSchema = new mongoose.Schema({
     ref: 'User',
     required: true,
   },
+  habitDetails: {
+    title: {
+      type: String,
+      required: true,
+    },
+    description: String,
+    frequency: {
+      type: String,
+      enum: ['Daily', 'Weekly', 'Monthly'],
+      required: true,
+    },
+    targetDays: {
+      type: Number,
+      required: true,
+      min: 1,
+    },
+    duration: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 1440, // 24 hours in minutes
+    },
+  },
   participants: [{
     user: {
       type: mongoose.Schema.Types.ObjectId,
@@ -50,6 +73,27 @@ const challengeSchema = new mongoose.Schema({
     completed: {
       type: Boolean,
       default: false,
+    },
+    completionDate: Date,
+    timePreferences: {
+      startTime: {
+        type: String,
+        validate: {
+          validator: function(v) {
+            return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v);
+          },
+          message: props => `${props.value} is not a valid time format! Use HH:mm format.`,
+        },
+      },
+      endTime: {
+        type: String,
+        validate: {
+          validator: function(v) {
+            return /^([01]\d|2[0-3]):([0-5]\d)$/.test(v);
+          },
+          message: props => `${props.value} is not a valid time format! Use HH:mm format.`,
+        },
+      },
     },
   }],
   requirements: {
@@ -125,6 +169,68 @@ challengeSchema.methods.updateParticipantProgress = function(userId, progress) {
     participant.progress = progress;
     participant.completed = progress >= 100;
   }
+};
+
+// Method to update participant time preferences
+challengeSchema.methods.updateParticipantTimePreferences = function(userId, timePreferences) {
+  const participant = this.participants.find(p => p.user.toString() === userId.toString());
+  if (participant) {
+    participant.timePreferences = timePreferences;
+  }
+};
+
+// Method to add challenge habit to a participant
+challengeSchema.methods.addHabitToParticipant = async function(userId, Habit) {
+  const participant = this.participants.find(p => p.user.toString() === userId.toString());
+  if (!participant) return;
+
+  const habit = new Habit({
+    user: userId,
+    title: this.habitDetails.title,
+    description: this.habitDetails.description,
+    category: this.category,
+    frequency: this.habitDetails.frequency,
+    targetDays: this.habitDetails.targetDays,
+    startTime: participant.timePreferences?.startTime,
+    endTime: participant.timePreferences?.endTime,
+    isChallengeHabit: true,
+    challenge: this._id,
+    startDate: this.startDate,
+    endDate: this.endDate
+  });
+  
+  await habit.save();
+};
+
+// Method to remove challenge habit from a participant
+challengeSchema.methods.removeHabitFromParticipant = async function(userId, Habit) {
+  await Habit.deleteOne({
+    user: userId,
+    challenge: this._id
+  });
+};
+
+// Method to check if a participant has completed the challenge
+challengeSchema.methods.checkCompletion = async function(userId, Habit) {
+  const habit = await Habit.findOne({
+    user: userId,
+    challenge: this._id
+  });
+  
+  if (!habit) return false;
+  
+  const now = new Date();
+  if (now > this.endDate) {
+    const participant = this.participants.find(p => p.user.toString() === userId.toString());
+    if (participant && !participant.completed) {
+      participant.completed = true;
+      participant.completionDate = now;
+      await this.save();
+    }
+    return true;
+  }
+  
+  return false;
 };
 
 const Challenge = mongoose.model('Challenge', challengeSchema);

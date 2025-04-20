@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 
 // Register new user
 router.post('/register', async (req, res) => {
@@ -56,27 +57,31 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+        console.log('Login attempt for email:', email);
 
         // Validate required fields
         if (!email || !password) {
+            console.log('Missing email or password');
             return res.status(400).json({ message: 'Email and password are required' });
         }
 
-        // Check if user exists
+        // Find user by email
         const user = await User.findOne({ email });
+        console.log('User found:', user ? 'Yes' : 'No');
+        
         if (!user) {
+            console.log('No user found with email:', email);
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        // Check password
+        // Check password using the model's method
         const isMatch = await user.comparePassword(password);
+        console.log('Password match:', isMatch);
+        
         if (!isMatch) {
+            console.log('Password does not match');
             return res.status(400).json({ message: 'Invalid credentials' });
         }
-
-        // Update last login
-        user.lastLogin = new Date();
-        await user.save();
 
         // Create JWT token
         const token = jwt.sign(
@@ -85,6 +90,11 @@ router.post('/login', async (req, res) => {
             { expiresIn: '7d' }
         );
 
+        // Update last login
+        user.lastLogin = Date.now();
+        await user.save();
+
+        console.log('Login successful for user:', user.email);
         res.json({
             token,
             user: {

@@ -52,6 +52,25 @@ const HabitCard = ({
   const [noteDialogOpen, setNoteDialogOpen] = useState(false);
   const [note, setNote] = useState('');
 
+  // Calculate progress if not provided
+  const calculatedProgress = progress || (() => {
+    try {
+      if (!habit.progress || !Array.isArray(habit.progress)) return 0;
+      const totalDays = habit.progress.length;
+      const completedDays = habit.progress.filter(p => {
+        if (!p || typeof p !== 'object') return false;
+        return p.completed === true || p.completed === 'true';
+      }).length;
+      return totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
+    } catch (error) {
+      console.error('Error calculating progress:', error);
+      return 0;
+    }
+  })();
+
+  // Calculate streak if not provided
+  const calculatedStreak = streak || habit.streak || 0;
+
   const handleMenuClick = (event) => {
     setAnchorEl(event.currentTarget);
   };
@@ -221,18 +240,18 @@ const HabitCard = ({
               Progress
             </Typography>
             <Typography variant="body2" color="text.secondary">
-              {progress}%
+              {calculatedProgress}%
             </Typography>
           </Box>
           <LinearProgress
             variant="determinate"
-            value={progress}
+            value={calculatedProgress}
             sx={{
               height: 8,
               borderRadius: 4,
               backgroundColor: theme.palette.grey[200],
               '& .MuiLinearProgress-bar': {
-                backgroundColor: getProgressColor(progress),
+                backgroundColor: getProgressColor(calculatedProgress),
               },
             }}
           />
@@ -275,9 +294,9 @@ const HabitCard = ({
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
             <Tooltip title="Current Streak">
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                <FireIcon sx={{ color: getStreakColor(streak) }} />
+                <FireIcon sx={{ color: getStreakColor(calculatedStreak) }} />
                 <Typography variant="body2" sx={{ ml: 0.5 }}>
-                  {streak} days
+                  {calculatedStreak} days
                 </Typography>
               </Box>
             </Tooltip>

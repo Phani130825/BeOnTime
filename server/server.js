@@ -6,6 +6,8 @@ const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/auth');
 const notificationRoutes = require('./routes/notificationRoutes');
 const statsRoutes = require('./routes/stats');
+const challengeRoutes = require('./routes/challenges');
+const communityRoutes = require('./routes/communities');
 
 const app = express();
 
@@ -19,11 +21,13 @@ connectDB().catch(err => {
 });
 
 // Routes
+app.use('/api/auth', authRoutes);
 app.use('/api/habits', habitRoutes);
 app.use('/api/users', userRoutes);
-app.use('/api/auth', authRoutes);
 app.use('/api/notifications', notificationRoutes);
 app.use('/api/stats', statsRoutes);
+app.use('/api/challenges', challengeRoutes);
+app.use('/api/communities', communityRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
