@@ -23,7 +23,7 @@ import {
   Tooltip,
   Legend,
 } from 'chart.js';
-import axios from 'axios';
+import api from '../config/api';
 import { useAuth } from '../contexts/AuthContext';
 
 ChartJS.register(
@@ -56,7 +56,7 @@ const Profile = () => {
 
   const fetchStats = async () => {
     try {
-      const response = await axios.get('/api/users/stats');
+      const response = await api.get('/api/users/stats');
       setStats(response.data);
     } catch (error) {
       console.error('Error fetching stats:', error);
@@ -70,7 +70,7 @@ const Profile = () => {
     try {
       setError('');
       setSuccess('');
-      await axios.patch('/api/users/profile', {
+      await api.patch('/api/users/profile', {
         username: formData.username,
         email: formData.email,
       });
@@ -88,7 +88,7 @@ const Profile = () => {
     try {
       setError('');
       setSuccess('');
-      await axios.post('/api/users/change-password', {
+      await api.post('/api/users/change-password', {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
       });

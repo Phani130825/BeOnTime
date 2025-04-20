@@ -26,7 +26,7 @@ import {
   CheckCircle as CheckCircleIcon,
 } from '@mui/icons-material';
 import { motion } from 'framer-motion';
-import axios from 'axios';
+import api from '../config/api';
 import { format, parseISO } from 'date-fns';
 
 const MotionBox = motion(Box);
@@ -60,7 +60,7 @@ const ProfilePopup = ({ open, onClose }) => {
   const fetchUserData = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/users/profile');
+      const response = await api.get('/api/users/profile');
       if (response.data && response.data.user) {
         setUserData(response.data.user);
         setStats(response.data.stats || {
@@ -100,7 +100,7 @@ const ProfilePopup = ({ open, onClose }) => {
     e.preventDefault();
     try {
       setLoading(true);
-      const response = await axios.put('/api/users/profile', {
+      const response = await api.put('/api/users/profile', {
         username: formData.username,
         email: formData.email,
       });
@@ -129,7 +129,7 @@ const ProfilePopup = ({ open, onClose }) => {
 
     try {
       setLoading(true);
-      await axios.put('/api/users/change-password', {
+      await api.post('/api/users/change-password', {
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
       });

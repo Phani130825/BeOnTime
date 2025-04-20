@@ -8,6 +8,11 @@ router.post('/register', async (req, res) => {
     try {
         const { username, email, password } = req.body;
 
+        // Validate required fields
+        if (!username || !email || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
         // Check if user already exists
         let user = await User.findOne({ $or: [{ email }, { username }] });
         if (user) {
@@ -39,8 +44,11 @@ router.post('/register', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Registration Error:', error);
+        res.status(500).json({ 
+            message: 'Registration failed',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 });
 
@@ -48,6 +56,11 @@ router.post('/register', async (req, res) => {
 router.post('/login', async (req, res) => {
     try {
         const { email, password } = req.body;
+
+        // Validate required fields
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email and password are required' });
+        }
 
         // Check if user exists
         const user = await User.findOne({ email });
@@ -81,8 +94,11 @@ router.post('/login', async (req, res) => {
             }
         });
     } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        console.error('Login Error:', error);
+        res.status(500).json({ 
+            message: 'Login failed',
+            error: process.env.NODE_ENV === 'development' ? error.message : undefined
+        });
     }
 });
 
@@ -103,7 +119,7 @@ router.get('/me', async (req, res) => {
 
         res.json(user);
     } catch (error) {
-        console.error(error);
+        console.error('Get Current User Error:', error);
         res.status(401).json({ message: 'Token is not valid' });
     }
 });
