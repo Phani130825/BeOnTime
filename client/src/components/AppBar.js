@@ -11,14 +11,18 @@ import {
   Typography,
   ListItemIcon,
   Button,
+  Tooltip,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   Logout as LogoutIcon,
   Settings as SettingsIcon,
+  LightMode as SunIcon,
+  DarkMode as MoonIcon,
 } from '@mui/icons-material';
 import { useNavigate, Link as RouterLink } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { useTheme } from '../contexts/ThemeContext';
 import ProfilePopup from './ProfilePopup';
 import NotificationIcon from './NotificationIcon';
 
@@ -26,6 +30,7 @@ const AppBar = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const { user, logout } = useAuth();
+  const { isDarkMode, toggleTheme } = useTheme();
   const navigate = useNavigate();
 
   const handleMenuOpen = (event) => {
@@ -64,6 +69,16 @@ const AppBar = () => {
 
           {user ? (
             <>
+              <Tooltip title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+                <IconButton 
+                  color="inherit" 
+                  onClick={toggleTheme}
+                  sx={{ mr: 1 }}
+                >
+                  {isDarkMode ? <MoonIcon /> : <SunIcon />}
+                </IconButton>
+              </Tooltip>
+              
               <NotificationIcon />
               <IconButton
                 color="inherit"

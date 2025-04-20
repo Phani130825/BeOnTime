@@ -10,13 +10,17 @@ import {
   FormControl,
   InputLabel,
   Divider,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
+import { LightMode as SunIcon, DarkMode as MoonIcon } from '@mui/icons-material';
+import { useTheme } from '../contexts/ThemeContext';
 
 const Settings = () => {
+  const { isDarkMode, toggleTheme } = useTheme();
   const [settings, setSettings] = useState({
     emailNotifications: true,
     pushNotifications: true,
-    darkMode: false,
     reminderTime: 'morning',
     habitDuration: '5',
   });
@@ -61,16 +65,27 @@ const Settings = () => {
               label="Push Notifications"
             />
           </Box>
-          <Box sx={{ mt: 2 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.darkMode}
-                  onChange={handleSettingChange('darkMode')}
-                />
-              }
-              label="Dark Mode"
-            />
+          <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
+            <Typography variant="body1" sx={{ mr: 2 }}>
+              Theme Mode
+            </Typography>
+            <Tooltip title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+              <IconButton 
+                onClick={toggleTheme} 
+                color="primary"
+                sx={{ 
+                  backgroundColor: isDarkMode ? 'rgba(144, 202, 249, 0.1)' : 'rgba(33, 150, 243, 0.1)',
+                  '&:hover': {
+                    backgroundColor: isDarkMode ? 'rgba(144, 202, 249, 0.2)' : 'rgba(33, 150, 243, 0.2)',
+                  }
+                }}
+              >
+                {isDarkMode ? <MoonIcon /> : <SunIcon />}
+              </IconButton>
+            </Tooltip>
+            <Typography variant="body2" sx={{ ml: 1 }}>
+              {isDarkMode ? 'Dark Mode' : 'Light Mode'}
+            </Typography>
           </Box>
         </Box>
       </Paper>
