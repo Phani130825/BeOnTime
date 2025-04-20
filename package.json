@@ -1,0 +1,28 @@
+{
+  "name": "beontime",
+  "version": "1.0.0",
+  "description": "Habit tracking application",
+  "main": "server/index.js",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "nodemon server/index.js",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install",
+    "build": "cd client && npm run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/yourusername/beontime.git"
+  },
+  "keywords": [
+    "habit",
+    "tracking",
+    "productivity",
+    "mern"
+  ],
+  "author": "Your Name",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/yourusername/beontime/issues"
+  },
+  "homepage": "https://github.com/yourusername/beontime#readme"
+} 

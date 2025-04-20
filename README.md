@@ -15,7 +15,7 @@ BeOnTime is a full-stack MERN (MongoDB, Express.js, React.js, Node.js) applicati
 ## Prerequisites
 
 - Node.js (v14 or higher)
-- MongoDB (v4.4 or higher)
+- MongoDB (v4.4 or higher) or MongoDB Atlas
 - npm or yarn package manager
 
 ## Installation
@@ -71,6 +71,27 @@ The application will be available at:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:5000
 
+## Deployment to Vercel
+
+This application is configured for easy deployment to Vercel:
+
+1. Push your code to a GitHub repository
+
+2. Log in to Vercel and create a new project:
+   - Connect to your GitHub repository
+   - Vercel will automatically detect the Node.js project
+
+3. Configure environment variables in Vercel:
+   - Go to Project Settings > Environment Variables
+   - Add all the variables from your .env file
+   - Make sure to use your MongoDB Atlas connection string for MONGODB_URI
+
+4. Deploy the project:
+   - Click "Deploy" to start the deployment process
+   - Vercel will automatically build and deploy your application
+
+5. After deployment, Vercel will provide you with a URL where your application is accessible
+
 ## API Endpoints
 
 ### Authentication
@@ -125,4 +146,3 @@ The application will be available at:
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
-# BeOnTime

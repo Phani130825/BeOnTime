@@ -13,8 +13,14 @@ const testHabitCompletion = async () => {
     await mongoose.connect(process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/beontime', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
-      socketTimeoutMS: 45000,
+      serverSelectionTimeoutMS: 60000, // Increased to 60 seconds
+      socketTimeoutMS: 60000, // Increased to 60 seconds
+      connectTimeoutMS: 60000, // Added explicit connect timeout
+      retryWrites: true,
+      w: 'majority',
+      maxPoolSize: 10, // Limit connection pool size
+      minPoolSize: 2, // Maintain at least 2 connections
+      maxIdleTimeMS: 30000 // Close idle connections after 30 seconds
     });
 
     console.log('Connected to MongoDB successfully');

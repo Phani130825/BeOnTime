@@ -12,6 +12,8 @@ const checkMongoDB = async () => {
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 30000, // Increase timeout to 30 seconds
       socketTimeoutMS: 45000,
+      retryWrites: true,
+      w: 'majority'
     });
     
     console.log('MongoDB Connected Successfully!');

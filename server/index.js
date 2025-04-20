@@ -19,7 +19,15 @@ app.use(express.urlencoded({ extended: true }));
 // Connect to MongoDB
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/beontime', {
   useNewUrlParser: true,
-  useUnifiedTopology: true
+  useUnifiedTopology: true,
+  serverSelectionTimeoutMS: 60000,
+  socketTimeoutMS: 60000,
+  connectTimeoutMS: 60000,
+  retryWrites: true,
+  w: 'majority',
+  maxPoolSize: 10,
+  minPoolSize: 2,
+  maxIdleTimeMS: 30000
 }).then(() => {
   console.log('Connected to MongoDB');
   // Start the scheduler
