@@ -1,36 +1,30 @@
 @echo off
-echo Preparing for GitHub deployment...
+echo 🚀 Starting deployment process...
 
-REM Check if .git directory exists
-if not exist .git (
-  echo Initializing git repository...
-  git init
+echo 📦 Installing dependencies...
+call npm run install-all
+
+echo 🏗️ Building client...
+cd client
+call npm run build
+cd ..
+
+REM Verify build directory exists
+if not exist "client\build" (
+  echo ❌ Build directory not found. Build process failed.
+  exit /b 1
 )
 
-REM Add all files
-echo Adding files to git...
-git add .
-
-REM Commit changes
-echo Committing changes...
-git commit -m "Prepare for Vercel deployment"
-
-REM Check if remote exists
-git remote -v | findstr "origin" > nul
-if %errorlevel% neq 0 (
-  echo Please enter your GitHub repository URL:
-  set /p repo_url=
-  git remote add origin %repo_url%
+REM Verify index.html exists
+if not exist "client\build\index.html" (
+  echo ❌ index.html not found in build directory. Build process failed.
+  exit /b 1
 )
 
-REM Push to GitHub
-echo Pushing to GitHub...
-git push -u origin main
-if %errorlevel% neq 0 (
-  echo Trying master branch instead...
-  git push -u origin master
-)
+echo ✅ Build successful!
 
-echo Deployment preparation complete!
-echo Now you can deploy to Vercel by connecting your GitHub repository.
+echo 🚀 Deploying to Vercel...
+call vercel --prod
+
+echo ✅ Deployment complete!
 pause 

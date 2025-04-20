@@ -1,108 +1,125 @@
-# Deploying BeOnTime to Vercel
+# Vercel Deployment Guide for BeOnTime
 
-This guide will walk you through the process of deploying your BeOnTime application to Vercel.
+This guide will help you deploy your BeOnTime application to Vercel.
 
 ## Prerequisites
 
-1. A GitHub account
-2. A Vercel account (you can sign up at [vercel.com](https://vercel.com) using your GitHub account)
-3. A MongoDB Atlas account with a cluster set up
+1. Install [Node.js](https://nodejs.org/) (v14 or higher)
+2. Install [Vercel CLI](https://vercel.com/docs/cli) globally:
+   ```
+   npm install -g vercel
+   ```
+3. Create a [Vercel account](https://vercel.com/signup) if you don't have one
+4. Make sure you have a MongoDB database set up (you can use [MongoDB Atlas](https://www.mongodb.com/cloud/atlas))
 
-## Step 1: Push Your Code to GitHub
+## Environment Variables
 
-1. If you haven't already, initialize a Git repository in your project folder:
-   ```bash
-   git init
+Before deploying, make sure to set up the following environment variables in your Vercel project:
+
+1. `MONGODB_URI`: Your MongoDB connection string
+2. `JWT_SECRET`: A secret key for JWT token generation
+3. `NODE_ENV`: Set to "production"
+
+## Important Note About Build Process
+
+The deployment process requires the React application to be built first, which generates the `client/build` directory containing the `index.html` file. This file is essential for the deployment to work correctly. The deployment scripts will handle this build process automatically.
+
+## Deployment Steps
+
+### Option 1: Using the Deployment Scripts
+
+#### For Windows Users:
+1. Run the `deploy.bat` script:
+   ```
+   deploy.bat
    ```
 
-2. Add all your files to Git:
-   ```bash
-   git add .
+#### For macOS/Linux Users:
+1. Make the script executable:
+   ```
+   chmod +x deploy.sh
+   ```
+2. Run the script:
+   ```
+   ./deploy.sh
    ```
 
-3. Commit your changes:
-   ```bash
-   git commit -m "Initial commit"
+### Option 2: Manual Deployment
+
+1. Install dependencies:
+   ```
+   npm run install-all
    ```
 
-4. Create a new repository on GitHub (don't initialize it with a README)
-
-5. Connect your local repository to GitHub:
-   ```bash
-   git remote add origin https://github.com/yourusername/beontime.git
+2. Build the client:
+   ```
+   cd client
+   npm run build
+   cd ..
    ```
 
-6. Push your code to GitHub:
-   ```bash
-   git push -u origin main
+3. Verify the build was successful:
    ```
-   (If your default branch is called "master" instead of "main", use `git push -u origin master`)
+   # Check if the build directory exists
+   dir client\build  # Windows
+   ls client/build   # macOS/Linux
+   
+   # Check if index.html exists
+   dir client\build\index.html  # Windows
+   ls client/build/index.html   # macOS/Linux
+   ```
 
-## Step 2: Deploy to Vercel
-
-1. Log in to your Vercel account
-
-2. Click "Add New..." and select "Project"
-
-3. Import your GitHub repository:
-   - Connect to GitHub if you haven't already
-   - Select the "beontime" repository
-   - Click "Import"
-
-4. Configure your project:
-   - Framework Preset: Other
-   - Root Directory: ./
-   - Build Command: `npm install`
-   - Output Directory: N/A
-   - Install Command: `npm install`
-
-5. Add Environment Variables:
-   - Click "Environment Variables"
-   - Add the following variables:
-     - `MONGODB_URI`: Your MongoDB Atlas connection string
-     - `JWT_SECRET`: Your JWT secret key
-     - `NODE_ENV`: production
-     - `SMTP_HOST`: Your SMTP host
-     - `SMTP_PORT`: Your SMTP port
-     - `SMTP_SECURE`: true or false
-     - `SMTP_USER`: Your SMTP username
-     - `SMTP_PASS`: Your SMTP password
-     - `SMTP_FROM`: Your sender email address
-
-6. Click "Deploy"
-
-## Step 3: Verify Your Deployment
-
-1. After deployment completes, Vercel will provide you with a URL where your application is accessible
-
-2. Test your application by:
-   - Creating a new user account
-   - Logging in
-   - Creating and managing habits
+4. Deploy to Vercel:
+   ```
+   vercel --prod
+   ```
 
 ## Troubleshooting
 
-### Common Issues
+### DEPLOYMENT_NOT_FOUND Error
 
-1. **Build Failures**:
-   - Check the build logs in Vercel for errors
-   - Make sure all dependencies are listed in package.json
-   - Verify that the vercel.json file is correctly configured
+If you encounter a DEPLOYMENT_NOT_FOUND error:
 
-2. **Connection Issues**:
-   - Ensure your MongoDB Atlas connection string is correct
-   - Check that your IP address is whitelisted in MongoDB Atlas
-   - Verify that your MongoDB Atlas user has the correct permissions
+1. Make sure you're logged in to Vercel:
+   ```
+   vercel login
+   ```
 
-3. **Environment Variables**:
-   - Make sure all required environment variables are set in Vercel
-   - Check for typos in variable names
-   - Ensure values are correctly formatted
+2. Check if your project is linked to Vercel:
+   ```
+   vercel link
+   ```
 
-### Getting Help
+3. Verify that the build process completed successfully and the `client/build/index.html` file exists.
 
-If you encounter issues not covered here:
+4. Try deploying again:
+   ```
+   vercel --prod
+   ```
 
-1. Check the [Vercel documentation](https://vercel.com/docs)
-2. Visit the [Vercel support page](https://vercel.com/support)
-3. Search for similar issues on [Stack Overflow](https://stackoverflow.com/questions/tagged/vercel) 
+### Build Failures
+
+If the build fails:
+
+1. Check the build logs in the Vercel dashboard
+2. Make sure all dependencies are correctly specified in package.json files
+3. Verify that the build commands in vercel.json are correct
+4. Try building locally first to identify any issues:
+   ```
+   cd client
+   npm run build
+   ```
+
+### API Issues
+
+If your API endpoints are not working:
+
+1. Check the server logs in the Vercel dashboard
+2. Verify that your MongoDB connection string is correct
+3. Make sure your API routes are properly configured in vercel.json
+
+## Additional Resources
+
+- [Vercel Documentation](https://vercel.com/docs)
+- [Vercel CLI Documentation](https://vercel.com/docs/cli)
+- [MongoDB Atlas Documentation](https://docs.atlas.mongodb.com/) 

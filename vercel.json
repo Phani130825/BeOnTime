@@ -6,7 +6,7 @@
       "use": "@vercel/static-build",
       "config": {
         "distDir": "build",
-        "buildCommand": "npm install && npm run build"
+        "buildCommand": "cd client && npm install && npm run build"
       }
     },
     {
@@ -24,15 +24,16 @@
       "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
       "headers": {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept"
+        "Access-Control-Allow-Headers": "Origin, X-Requested-With, Content-Type, Accept, Authorization"
       }
     },
     {
-      "handle": "filesystem"
+      "src": "/(.*\\.(js|css|ico|png|jpg|jpeg|svg|gif|json|html))",
+      "dest": "client/build/$1"
     },
     {
       "src": "/(.*)",
-      "dest": "client/build/$1"
+      "dest": "client/build/index.html"
     }
   ],
   "env": {

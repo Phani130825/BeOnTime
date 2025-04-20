@@ -1,32 +1,36 @@
 #!/bin/bash
 
-# Ensure we're in the project root
-cd "$(dirname "$0")"
+# Exit on error
+set -e
 
-# Check if .git directory exists
-if [ ! -d ".git" ]; then
-  echo "Initializing git repository..."
-  git init
+echo "🚀 Starting deployment process..."
+
+# Install dependencies
+echo "📦 Installing dependencies..."
+npm run install-all
+
+# Build the client
+echo "🏗️ Building client..."
+cd client
+npm run build
+cd ..
+
+# Verify build directory exists
+if [ ! -d "client/build" ]; then
+  echo "❌ Build directory not found. Build process failed."
+  exit 1
 fi
 
-# Add all files
-echo "Adding files to git..."
-git add .
-
-# Commit changes
-echo "Committing changes..."
-git commit -m "Prepare for Vercel deployment"
-
-# Check if remote exists
-if ! git remote | grep -q "origin"; then
-  echo "Please enter your GitHub repository URL:"
-  read repo_url
-  git remote add origin $repo_url
+# Verify index.html exists
+if [ ! -f "client/build/index.html" ]; then
+  echo "❌ index.html not found in build directory. Build process failed."
+  exit 1
 fi
 
-# Push to GitHub
-echo "Pushing to GitHub..."
-git push -u origin main || git push -u origin master
+echo "✅ Build successful!"
 
-echo "Deployment preparation complete!"
-echo "Now you can deploy to Vercel by connecting your GitHub repository." 
+# Deploy to Vercel
+echo "🚀 Deploying to Vercel..."
+vercel --prod
+
+echo "✅ Deployment complete!" 

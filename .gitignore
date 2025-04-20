@@ -143,3 +143,4 @@ Thumbs.db
 *.jks
 *.keystore
 *.truststore 
+.vercel
