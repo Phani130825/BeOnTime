@@ -33,6 +33,12 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
+    notificationPreferences: {
+        email: {
+            type: Boolean,
+            default: true
+        }
+    },
     createdAt: {
         type: Date,
         default: Date.now

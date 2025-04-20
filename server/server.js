@@ -8,6 +8,7 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const statsRoutes = require('./routes/stats');
 const challengeRoutes = require('./routes/challenges');
 const communityRoutes = require('./routes/communities');
+const scheduler = require('./services/scheduler');
 
 const app = express();
 
@@ -42,4 +43,6 @@ const PORT = process.env.PORT || 5000;
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+  // Start the notification scheduler
+  scheduler.start();
 }); 

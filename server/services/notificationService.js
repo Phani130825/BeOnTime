@@ -1,5 +1,6 @@
 const Notification = require('../models/Notification');
 const Habit = require('../models/Habit');
+const emailService = require('./emailService');
 
 // Create habit reminder notification
 const createHabitReminder = async (habit, type = 'start') => {
@@ -38,6 +39,12 @@ const createHabitReminder = async (habit, type = 'start') => {
         console.log('Saving notification:', notification);
         await notification.save();
         console.log('Notification saved successfully:', notification);
+
+        // Send email notification
+        if (type === 'start') {
+            await emailService.sendHabitReminderEmail(habit.user, habit);
+        }
+
         return notification;
     } catch (error) {
         console.error('Error in createHabitReminder:', {
@@ -70,6 +77,10 @@ const createStreakAchievement = async (habit, streak) => {
         });
 
         await notification.save();
+
+        // Send email notification
+        await emailService.sendStreakAchievementEmail(habit.user, habit, streak);
+
         return notification;
     } catch (error) {
         console.error('Error creating streak achievement notification:', error);
@@ -93,6 +104,10 @@ const createHabitCompletion = async (habit) => {
         });
 
         await notification.save();
+
+        // Send email notification
+        await emailService.sendHabitCompletionEmail(habit.user, habit);
+
         return notification;
     } catch (error) {
         console.error('Error creating habit completion notification:', error);
@@ -112,6 +127,15 @@ const createSystemNotification = async (userId, title, message, data = {}) => {
         });
 
         await notification.save();
+
+        // Send email notification
+        await emailService.sendEmailNotification(
+            userId,
+            title,
+            message,
+            `<h2>${title}</h2><p>${message}</p>`
+        );
+
         return notification;
     } catch (error) {
         console.error('Error creating system notification:', error);

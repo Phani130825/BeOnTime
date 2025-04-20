@@ -287,6 +287,22 @@ const HabitForm = ({ open, onClose, onSave, habit = null }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      // Validate end time is after start time if both are set
+      if (formData.startTime && formData.endTime) {
+        const startDateTime = new Date();
+        startDateTime.setHours(formData.startTime.getHours());
+        startDateTime.setMinutes(formData.startTime.getMinutes());
+        
+        const endDateTime = new Date();
+        endDateTime.setHours(formData.endTime.getHours());
+        endDateTime.setMinutes(formData.endTime.getMinutes());
+        
+        if (endDateTime <= startDateTime) {
+          alert('End time must be after start time');
+          return;
+        }
+      }
+
       const habitData = {
         ...formData,
         notes: Array.isArray(formData.notes) ? 

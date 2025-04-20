@@ -1,0 +1,27 @@
+[1mdiff --git a/client/src/components/HabitForm.js b/client/src/components/HabitForm.js[m
+[1mindex e249171..0524034 100644[m
+[1m--- a/client/src/components/HabitForm.js[m
+[1m+++ b/client/src/components/HabitForm.js[m
+[36m@@ -287,6 +287,22 @@[m [mconst HabitForm = ({ open, onClose, onSave, habit = null }) => {[m
+   const handleSubmit = async (e) => {[m
+     e.preventDefault();[m
+     try {[m
+[32m+[m[32m      // Validate end time is after start time if both are set[m
+[32m+[m[32m      if (formData.startTime && formData.endTime) {[m
+[32m+[m[32m        const startDateTime = new Date();[m
+[32m+[m[32m        startDateTime.setHours(formData.startTime.getHours());[m
+[32m+[m[32m        startDateTime.setMinutes(formData.startTime.getMinutes());[m
+[32m+[m[41m        [m
+[32m+[m[32m        const endDateTime = new Date();[m
+[32m+[m[32m        endDateTime.setHours(formData.endTime.getHours());[m
+[32m+[m[32m        endDateTime.setMinutes(formData.endTime.getMinutes());[m
+[32m+[m[41m        [m
+[32m+[m[32m        if (endDateTime <= startDateTime) {[m
+[32m+[m[32m          alert('End time must be after start time');[m
+[32m+[m[32m          return;[m
+[32m+[m[32m        }[m
+[32m+[m[32m      }[m
+[32m+[m
+       const habitData = {[m
+         ...formData,[m
+         notes: Array.isArray(formData.notes) ? [m

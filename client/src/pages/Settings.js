@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -12,24 +12,79 @@ import {
   Divider,
   IconButton,
   Tooltip,
+  Snackbar,
+  Alert,
 } from '@mui/material';
 import { LightMode as SunIcon, DarkMode as MoonIcon } from '@mui/icons-material';
 import { useTheme } from '../contexts/ThemeContext';
+import api from '../config/api';
 
 const Settings = () => {
   const { isDarkMode, toggleTheme } = useTheme();
   const [settings, setSettings] = useState({
     emailNotifications: true,
-    pushNotifications: true,
     reminderTime: 'morning',
     habitDuration: '5',
   });
+  const [snackbar, setSnackbar] = useState({
+    open: false,
+    message: '',
+    severity: 'success',
+  });
 
-  const handleSettingChange = (setting) => (event) => {
+  useEffect(() => {
+    fetchNotificationPreferences();
+  }, []);
+
+  const fetchNotificationPreferences = async () => {
+    try {
+      const response = await api.get('/api/notifications/preferences');
+      setSettings(prev => ({
+        ...prev,
+        emailNotifications: response.data.email,
+      }));
+    } catch (error) {
+      console.error('Error fetching notification preferences:', error);
+      showSnackbar('Error loading notification preferences', 'error');
+    }
+  };
+
+  const showSnackbar = (message, severity = 'success') => {
+    setSnackbar({
+      open: true,
+      message,
+      severity,
+    });
+  };
+
+  const handleSettingChange = (setting) => async (event) => {
+    const newValue = event.target.checked !== undefined ? event.target.checked : event.target.value;
+    
     setSettings((prev) => ({
       ...prev,
-      [setting]: event.target.checked !== undefined ? event.target.checked : event.target.value,
+      [setting]: newValue,
     }));
+
+    if (setting === 'emailNotifications') {
+      try {
+        await api.patch('/api/notifications/preferences', {
+          email: newValue,
+        });
+        showSnackbar('Notification preferences updated successfully');
+      } catch (error) {
+        console.error('Error updating notification preferences:', error);
+        showSnackbar('Error updating notification preferences', 'error');
+        // Revert the change on error
+        setSettings((prev) => ({
+          ...prev,
+          [setting]: !newValue,
+        }));
+      }
+    }
+  };
+
+  const handleCloseSnackbar = () => {
+    setSnackbar((prev) => ({ ...prev, open: false }));
   };
 
   return (
@@ -52,17 +107,6 @@ const Settings = () => {
                 />
               }
               label="Email Notifications"
-            />
-          </Box>
-          <Box sx={{ mt: 2 }}>
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={settings.pushNotifications}
-                  onChange={handleSettingChange('pushNotifications')}
-                />
-              }
-              label="Push Notifications"
             />
           </Box>
           <Box sx={{ mt: 2, display: 'flex', alignItems: 'center' }}>
@@ -129,6 +173,21 @@ const Settings = () => {
           </Box>
         </Box>
       </Paper>
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={handleCloseSnackbar}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };
