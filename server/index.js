@@ -46,8 +46,12 @@ app.use('/api/notifications', notificationRoutes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {
+  const buildPath = path.join(__dirname, '../client/build');
+  console.log('Build path:', buildPath);
+  console.log('Build directory exists:', require('fs').existsSync(buildPath));
+  
   // Serve static files from the React app
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  app.use(express.static(buildPath));
 
   // The "catchall" handler: for any request that doesn't
   // match one above, send back React's index.html file.
