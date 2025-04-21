@@ -1,8 +1,24 @@
 import axios from 'axios';
 
+// Determine the API URL based on the environment
+const getApiUrl = () => {
+  // If REACT_APP_API_URL is set, use it (for production)
+  if (process.env.REACT_APP_API_URL) {
+    return process.env.REACT_APP_API_URL;
+  }
+  
+  // For local development
+  if (window.location.hostname === 'localhost') {
+    return 'http://localhost:5000';
+  }
+  
+  // For production deployment, use the current hostname
+  return `https://${window.location.hostname}`;
+};
+
 // Set the base URL for all API requests
 const api = axios.create({
-  baseURL: process.env.REACT_APP_API_URL || 'http://localhost:5000',
+  baseURL: getApiUrl(),
   headers: {
     'Content-Type': 'application/json'
   },

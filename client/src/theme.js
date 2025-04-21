@@ -2,6 +2,15 @@ import { createTheme } from '@mui/material/styles';
 
 // Common theme settings
 const commonThemeSettings = {
+  breakpoints: {
+    values: {
+      xs: 0,
+      sm: 600,
+      md: 960,
+      lg: 1280,
+      xl: 1920,
+    },
+  },
   typography: {
     fontFamily: '"Roboto", "Helvetica", "Arial", sans-serif',
     h1: {

@@ -26,10 +26,16 @@ const Login = () => {
       setError('');
       setLoading(true);
       await login(email, password);
-      navigate('/dashboard');
+      navigate('/');
     } catch (error) {
       console.error('Login error:', error);
-      setError(error.message || 'Failed to login. Please try again.');
+      if (error.message.includes('Server is not running')) {
+        setError('Unable to connect to the server. Please try again later.');
+      } else if (error.message.includes('Network Error')) {
+        setError('Network error. Please check your internet connection and try again.');
+      } else {
+        setError(error.message || 'Failed to login. Please check your credentials and try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -39,13 +45,14 @@ const Login = () => {
     <Container maxWidth="sm">
       <Box
         sx={{
-          marginTop: 8,
+          marginTop: { xs: 4, sm: 8 },
           display: 'flex',
           flexDirection: 'column',
           alignItems: 'center',
+          px: { xs: 2, sm: 0 }
         }}
       >
-        <Typography component="h1" variant="h5">
+        <Typography component="h1" variant="h5" sx={{ mb: 3 }}>
           Sign in
         </Typography>
         {error && (

@@ -34,10 +34,22 @@ const ProtectedRoute = ({ children }) => {
 
 const AppRoutes = () => {
   return (
-    <Box sx={{ display: 'flex' }}>
+    <Box sx={{ 
+      display: 'flex',
+      flexDirection: { xs: 'column', md: 'row' },
+      minHeight: '100vh'
+    }}>
       <CustomAppBar />
       <Sidebar />
-      <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+      <Box 
+        component="main" 
+        sx={{ 
+          flexGrow: 1, 
+          p: { xs: 2, md: 3 },
+          width: '100%',
+          mt: { xs: 8, md: 0 } // Add margin top for mobile to account for fixed AppBar
+        }}
+      >
         <Routes>
           {/* Public Routes */}
           <Route path="/login" element={<Login />} />
