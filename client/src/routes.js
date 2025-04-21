@@ -47,7 +47,9 @@ const AppRoutes = () => {
           flexGrow: 1, 
           p: { xs: 2, md: 3 },
           width: '100%',
-          mt: { xs: 8, md: 0 } // Add margin top for mobile to account for fixed AppBar
+          mt: { xs: 8, md: 9 }, // Increased top margin to account for fixed AppBar
+          minHeight: '100vh',
+          overflow: 'auto'
         }}
       >
         <Routes>

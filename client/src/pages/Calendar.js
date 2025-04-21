@@ -115,9 +115,9 @@ const Calendar = () => {
   }
 
   return (
-    <Box sx={{ p: 3 }}>
-      <Paper sx={{ p: 2, mb: 2 }}>
-        <Typography variant="h5" gutterBottom>
+    <Box sx={{ p: 3, mt: 2 }}>
+      <Paper sx={{ p: 3, mb: 3 }}>
+        <Typography variant="h5" gutterBottom sx={{ mb: 3 }}>
           Your Habits Calendar
         </Typography>
         <FullCalendar
