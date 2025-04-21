@@ -104,11 +104,15 @@ const Community = () => {
         api.get('/api/challenges')
       ]);
       
-      setCommunities(communitiesRes.data);
-      setChallenges(challengesRes.data);
+      // Ensure we're setting arrays even if the API returns unexpected data
+      setCommunities(Array.isArray(communitiesRes.data) ? communitiesRes.data : []);
+      setChallenges(Array.isArray(challengesRes.data) ? challengesRes.data : []);
     } catch (err) {
       console.error('Error fetching data:', err);
       setError(err.response?.data?.message || 'Failed to fetch data');
+      // Set empty arrays on error to prevent filter errors
+      setCommunities([]);
+      setChallenges([]);
     } finally {
       setLoading(false);
     }
@@ -231,10 +235,10 @@ const Community = () => {
     );
   }
 
-  const userCommunities = communities.filter(c => c.creator._id === user._id);
-  const publicCommunities = communities.filter(c => c.creator._id !== user._id);
-  const userChallenges = challenges.filter(c => c.creator._id === user._id);
-  const publicChallenges = challenges.filter(c => c.creator._id !== user._id);
+  const userCommunities = Array.isArray(communities) ? communities.filter(c => c.creator._id === user._id) : [];
+  const publicCommunities = Array.isArray(communities) ? communities.filter(c => c.creator._id !== user._id) : [];
+  const userChallenges = Array.isArray(challenges) ? challenges.filter(c => c.creator._id === user._id) : [];
+  const publicChallenges = Array.isArray(challenges) ? challenges.filter(c => c.creator._id !== user._id) : [];
 
   return (
     <Box sx={{ p: 3, mt: 2 }}>
