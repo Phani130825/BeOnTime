@@ -231,10 +231,14 @@ const Community = () => {
     );
   }
 
-  const userCommunities = communities.filter(c => c.creator._id === user._id);
-  const publicCommunities = communities.filter(c => c.creator._id !== user._id);
-  const userChallenges = challenges.filter(c => c.creator._id === user._id);
-  const publicChallenges = challenges.filter(c => c.creator._id !== user._id);
+  // Ensure communities and challenges are arrays before filtering
+  const communitiesArray = Array.isArray(communities) ? communities : [];
+  const challengesArray = Array.isArray(challenges) ? challenges : [];
+
+  const userCommunities = communitiesArray.filter(c => c.creator?._id === user?._id);
+  const publicCommunities = communitiesArray.filter(c => c.creator?._id !== user?._id);
+  const userChallenges = challengesArray.filter(c => c.creator?._id === user?._id);
+  const publicChallenges = challengesArray.filter(c => c.creator?._id !== user?._id);
 
   return (
     <Box sx={{ p: 3 }}>
