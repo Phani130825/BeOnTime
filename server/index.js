@@ -7,6 +7,7 @@ const challengeRoutes = require('./routes/challenges');
 const userRoutes = require('./routes/userRoutes');
 const authRoutes = require('./routes/auth');
 const notificationRoutes = require('./routes/notificationRoutes');
+const pomodoroRoutes = require('./routes/pomodoroRoutes');
 const scheduler = require('./services/scheduler');
 require('dotenv').config();
 
@@ -43,6 +44,7 @@ app.use('/api/habits', habitRoutes);
 app.use('/api/challenges', challengeRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/notifications', notificationRoutes);
+app.use('/api/pomodoro', pomodoroRoutes);
 
 // Serve static files in production
 if (process.env.NODE_ENV === 'production') {

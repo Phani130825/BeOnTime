@@ -18,6 +18,7 @@ import {
   CalendarToday as CalendarIcon,
   People as CommunityIcon,
   Settings as SettingsIcon,
+  Timer as TimerIcon,
 } from '@mui/icons-material';
 
 const drawerWidth = 240;
@@ -25,6 +26,7 @@ const drawerWidth = 240;
 const menuItems = [
   { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
   { text: 'Overview', icon: <HabitsIcon />, path: '/overview' },
+  { text: 'Pomodoro', icon: <TimerIcon />, path: '/pomodoro' },
   { text: 'Calendar', icon: <CalendarIcon />, path: '/calendar' },
   { text: 'Community', icon: <CommunityIcon />, path: '/community' },
   { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },

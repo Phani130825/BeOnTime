@@ -314,15 +314,29 @@ const HabitCard = ({
       </CardContent>
 
       <CardActions sx={{ p: 2, pt: 0 }}>
-        <Button
-          fullWidth
-          variant="contained"
-          color="primary"
-          startIcon={<CheckCircleIcon />}
-          onClick={handleComplete}
-        >
-          Complete Today
-        </Button>
+        {!habit.completionHistory?.some(entry => 
+          new Date(entry.date).toDateString() === new Date().toDateString() && entry.completed
+        ) ? (
+          <Button
+            fullWidth
+            variant="contained"
+            color="primary"
+            startIcon={<CheckCircleIcon />}
+            onClick={handleComplete}
+          >
+            Complete Today
+          </Button>
+        ) : (
+          <Button
+            fullWidth
+            variant="outlined"
+            color="success"
+            startIcon={<CheckCircleIcon />}
+            disabled
+          >
+            Completed Today
+          </Button>
+        )}
       </CardActions>
 
       <Dialog

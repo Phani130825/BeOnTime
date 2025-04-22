@@ -12,6 +12,7 @@ import Community from './pages/Community';
 import Settings from './pages/Settings';
 import Profile from './pages/Profile';
 import Calendar from './pages/Calendar';
+import Pomodoro from './pages/Pomodoro';
 
 // Components
 import CustomAppBar from './components/AppBar';
@@ -103,6 +104,14 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/pomodoro"
+            element={
+              <ProtectedRoute>
+                <Pomodoro />
               </ProtectedRoute>
             }
           />

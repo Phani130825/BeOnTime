@@ -8,6 +8,7 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const statsRoutes = require('./routes/stats');
 const challengeRoutes = require('./routes/challenges');
 const communityRoutes = require('./routes/communities');
+const pomodoroRoutes = require('./routes/pomodoroRoutes');
 const scheduler = require('./services/scheduler');
 
 const app = express();
@@ -29,6 +30,7 @@ app.use('/api/notifications', notificationRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/challenges', challengeRoutes);
 app.use('/api/communities', communityRoutes);
+app.use('/api/pomodoro', pomodoroRoutes);
 
 // Error handling middleware
 app.use((err, req, res, next) => {
