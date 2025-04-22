@@ -33,7 +33,7 @@ import axios from 'axios';
 
 // Configure axios to use the correct base URL and default headers
 axios.defaults.baseURL = process.env.NODE_ENV === 'production' 
-  ? '/api'  // In production, use relative path
+  ? 'https://beontime.onrender.com/api'  // In production, use the full Render URL
   : 'http://localhost:5000';  // In development, use local server
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
@@ -386,7 +386,7 @@ const Pomodoro = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const { data: savedSession } = await axios.post('/api/pomodoro/sessions', newSession);
+        const { data: savedSession } = await axios.post('/pomodoro/sessions', newSession);
         
         // Update state with server response
         setPomodorosCompleted(prev => prev + 1);
@@ -404,9 +404,18 @@ const Pomodoro = () => {
         console.error('Error saving pomodoro session:', error);
         if (error.response?.status === 401) {
           setError('Please log in to save your sessions');
+        } else if (error.response?.status === 404) {
+          setError('Server endpoint not found. Please check your connection.');
         } else {
           setError('Failed to save session. Your progress may not be tracked.');
         }
+        // Still update local state even if server save fails
+        setPomodorosCompleted(prev => prev + 1);
+        setSessions(prev => [{
+          id: `temp-${Date.now()}`,
+          ...newSession,
+          completedAt: new Date()
+        }, ...prev]);
       } finally {
         setIsLoading(false);
       }
@@ -421,7 +430,7 @@ const Pomodoro = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const { data: savedSession } = await axios.post('/api/pomodoro/sessions', newSession);
+        const { data: savedSession } = await axios.post('/pomodoro/sessions', newSession);
         
         // Update state with server response
         setSessions(prev => [savedSession, ...prev]);
@@ -431,9 +440,19 @@ const Pomodoro = () => {
         console.error('Error saving break session:', error);
         if (error.response?.status === 401) {
           setError('Please log in to save your sessions');
+        } else if (error.response?.status === 404) {
+          setError('Server endpoint not found. Please check your connection.');
         } else {
           setError('Failed to save break session. Your progress may not be tracked.');
         }
+        // Still update local state even if server save fails
+        setSessions(prev => [{
+          id: `temp-${Date.now()}`,
+          ...newSession,
+          completedAt: new Date()
+        }, ...prev]);
+        setMode('work');
+        setTimeLeft(workDuration * 60);
       } finally {
         setIsLoading(false);
       }
