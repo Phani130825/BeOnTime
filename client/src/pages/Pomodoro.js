@@ -241,7 +241,7 @@ const Pomodoro = () => {
         }
 
         const response = await axios.get('/api/pomodoro/daily-stats');
-        const { totalPomodoros, sessions: dbSessions } = response.data;
+        const { totalPomodoros = 0, sessions: dbSessions = [] } = response.data || {};
         
         setPomodorosCompleted(totalPomodoros);
         setSessions(dbSessions.map(session => ({
@@ -259,6 +259,9 @@ const Pomodoro = () => {
         } else {
           setError('Failed to load sessions. Please try again later.');
         }
+        // Initialize with empty state on error
+        setSessions([]);
+        setPomodorosCompleted(0);
       } finally {
         setIsLoading(false);
       }
@@ -318,11 +321,15 @@ const Pomodoro = () => {
   
   // Add effect to save data to localStorage
   useEffect(() => {
-    localStorage.setItem('pomodorosCompleted', pomodorosCompleted.toString());
+    if (pomodorosCompleted !== undefined) {
+      localStorage.setItem('pomodorosCompleted', pomodorosCompleted.toString());
+    }
   }, [pomodorosCompleted]);
 
   useEffect(() => {
-    localStorage.setItem('pomodoroSessions', JSON.stringify(sessions));
+    if (sessions && sessions.length > 0) {
+      localStorage.setItem('pomodoroSessions', JSON.stringify(sessions));
+    }
   }, [sessions]);
 
   // Add effect to check and reset daily data

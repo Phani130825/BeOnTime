@@ -88,10 +88,16 @@ exports.getDailyStats = async (req, res) => {
       completedAt: { $gte: today }
     }).sort({ completedAt: -1 });
 
+    // Ensure we always return a valid response structure
     const stats = {
       totalPomodoros: sessions.filter(s => s.type === 'work').length,
-      totalMinutes: sessions.reduce((acc, curr) => acc + curr.duration, 0),
-      sessions: sessions,
+      totalMinutes: sessions.reduce((acc, curr) => acc + (curr.duration || 0), 0),
+      sessions: sessions.map(session => ({
+        _id: session._id,
+        type: session.type,
+        duration: session.duration,
+        completedAt: session.completedAt
+      })),
       today: today.toISOString()
     };
 
@@ -99,9 +105,14 @@ exports.getDailyStats = async (req, res) => {
     res.json(stats);
   } catch (error) {
     console.error('Error fetching daily stats:', error);
+    // Return a valid empty response structure on error
     res.status(500).json({ 
       message: 'Failed to fetch daily stats',
-      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined,
+      totalPomodoros: 0,
+      totalMinutes: 0,
+      sessions: [],
+      today: new Date().toISOString()
     });
   }
 };
