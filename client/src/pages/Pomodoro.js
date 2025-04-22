@@ -33,7 +33,7 @@ import axios from 'axios';
 
 // Configure axios to use the correct base URL and default headers
 axios.defaults.baseURL = process.env.NODE_ENV === 'production' 
-  ? 'https://beontime.onrender.com/api'  // In production, use the full Render URL
+  ? 'https://beontime.onrender.com'  // In production, use the Render URL without /api
   : 'http://localhost:5000';  // In development, use local server
 axios.defaults.headers.common['Content-Type'] = 'application/json';
 
@@ -386,7 +386,7 @@ const Pomodoro = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const { data: savedSession } = await axios.post('/pomodoro/sessions', newSession);
+        const { data: savedSession } = await axios.post('/api/pomodoro/sessions', newSession);
         
         // Update state with server response
         setPomodorosCompleted(prev => prev + 1);
@@ -430,7 +430,7 @@ const Pomodoro = () => {
       try {
         setIsLoading(true);
         setError(null);
-        const { data: savedSession } = await axios.post('/pomodoro/sessions', newSession);
+        const { data: savedSession } = await axios.post('/api/pomodoro/sessions', newSession);
         
         // Update state with server response
         setSessions(prev => [savedSession, ...prev]);
