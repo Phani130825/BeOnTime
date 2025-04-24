@@ -10,25 +10,53 @@ import {
   ListItemIcon,
   Button,
   Tooltip,
+  Drawer,
+  List,
+  ListItem,
+  ListItemIcon as MuiListItemIcon,
+  ListItemText,
+  Divider,
+  useTheme,
+  useMediaQuery,
+  Typography,
 } from '@mui/material';
 import {
   Menu as MenuIcon,
   Logout as LogoutIcon,
   LightMode as SunIcon,
   DarkMode as MoonIcon,
+  Dashboard as DashboardIcon,
+  FitnessCenter as HabitsIcon,
+  CalendarToday as CalendarIcon,
+  People as CommunityIcon,
+  Settings as SettingsIcon,
+  Timer as TimerIcon,
 } from '@mui/icons-material';
-import { useNavigate, Link as RouterLink } from 'react-router-dom';
+import { useNavigate, Link as RouterLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme as useThemeContext } from '../contexts/ThemeContext';
 import ProfilePopup from './ProfilePopup';
 import NotificationIcon from './NotificationIcon';
 
+const menuItems = [
+  { text: 'Dashboard', icon: <DashboardIcon />, path: '/' },
+  { text: 'Overview', icon: <HabitsIcon />, path: '/overview' },
+  { text: 'Pomodoro', icon: <TimerIcon />, path: '/pomodoro' },
+  { text: 'Calendar', icon: <CalendarIcon />, path: '/calendar' },
+  { text: 'Community', icon: <CommunityIcon />, path: '/community' },
+  { text: 'Settings', icon: <SettingsIcon />, path: '/settings' },
+];
+
 const AppBar = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const [profileOpen, setProfileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user, logout } = useAuth();
-  const { isDarkMode, toggleTheme } = useTheme();
+  const { isDarkMode, toggleTheme } = useThemeContext();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const handleMenuOpen = (event) => {
     setAnchorEl(event.currentTarget);
@@ -49,6 +77,51 @@ const AppBar = () => {
     navigate('/login');
   };
 
+  const handleMobileMenuToggle = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const renderMobileMenu = () => (
+    <Drawer
+      anchor="left"
+      open={mobileMenuOpen}
+      onClose={handleMobileMenuToggle}
+      PaperProps={{
+        sx: {
+          width: 240,
+          backgroundColor: theme.palette.background.paper,
+        },
+      }}
+    >
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h6" color="primary">
+          BeOnTime
+        </Typography>
+      </Box>
+      <Divider />
+      <List>
+        {menuItems.map((item) => (
+          <ListItem
+            button
+            component={RouterLink}
+            to={item.path}
+            key={item.text}
+            selected={location.pathname === item.path}
+            onClick={handleMobileMenuToggle}
+          >
+            <MuiListItemIcon>{item.icon}</MuiListItemIcon>
+            <ListItemText primary={item.text} />
+          </ListItem>
+        ))}
+        <Divider />
+        <ListItem button onClick={handleLogout}>
+          <MuiListItemIcon><LogoutIcon /></MuiListItemIcon>
+          <ListItemText primary="Logout" />
+        </ListItem>
+      </List>
+    </Drawer>
+  );
+
   return (
     <>
       <MuiAppBar position="fixed">
@@ -57,7 +130,8 @@ const AppBar = () => {
             edge="start"
             color="inherit"
             aria-label="menu"
-            onClick={handleMenuOpen}
+            onClick={isMobile ? handleMobileMenuToggle : handleMenuOpen}
+            sx={{ mr: 2 }}
           >
             <MenuIcon />
           </IconButton>
@@ -135,6 +209,7 @@ const AppBar = () => {
         </Toolbar>
       </MuiAppBar>
 
+      {renderMobileMenu()}
       <ProfilePopup open={profileOpen} onClose={() => setProfileOpen(false)} />
     </>
   );
