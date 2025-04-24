@@ -31,6 +31,8 @@ import {
   People as CommunityIcon,
   Settings as SettingsIcon,
   Timer as TimerIcon,
+  Login as LoginIcon,
+  PersonAdd as PersonAddIcon,
 } from '@mui/icons-material';
 import { useNavigate, Link as RouterLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -53,20 +55,23 @@ const AppBar = () => {
   const [profileOpen, setProfileOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { user, logout } = useAuth();
+  const { user, logout, isAuthenticated } = useAuth();
   const { isDarkMode, toggleTheme } = useThemeContext();
   const navigate = useNavigate();
   const location = useLocation();
-
 
 
   const handleMenuClose = () => {
     setAnchorEl(null);
   };
 
-  const handleProfileClick = () => {
+  const handleProfilePopupOpen = () => {
     setProfileOpen(true);
     handleMenuClose();
+  };
+
+  const handleProfileClick = (event) => {
+    setAnchorEl(event.currentTarget);
   };
 
   const handleLogout = () => {
@@ -105,51 +110,54 @@ const AppBar = () => {
       </Box>
       <Divider />
       <List>
-        {menuItems.map((item) => (
-          <ListItem
-            button
-            key={item.text}
-            selected={location.pathname === item.path}
-            onClick={() => handleNavigation(item.path)}
-          >
-            <MuiListItemIcon>{item.icon}</MuiListItemIcon>
-            <ListItemText primary={item.text} />
-          </ListItem>
-        ))}
-        <Divider />
-        <ListItem button onClick={handleLogout}>
-          <MuiListItemIcon><LogoutIcon /></MuiListItemIcon>
-          <ListItemText primary="Logout" />
-        </ListItem>
+        {isAuthenticated ? (
+          <>
+            {menuItems.map((item) => (
+              <ListItem
+                button
+                key={item.text}
+                selected={location.pathname === item.path}
+                onClick={() => handleNavigation(item.path)}
+              >
+                <MuiListItemIcon>{item.icon}</MuiListItemIcon>
+                <ListItemText primary={item.text} />
+              </ListItem>
+            ))}
+            <Divider />
+            <ListItem button onClick={handleLogout}>
+              <MuiListItemIcon><LogoutIcon /></MuiListItemIcon>
+              <ListItemText primary="Logout" />
+            </ListItem>
+          </>
+        ) : (
+          <>
+            <ListItem
+              button
+              selected={location.pathname === '/login'}
+              onClick={() => handleNavigation('/login')}
+            >
+              <MuiListItemIcon><LoginIcon /></MuiListItemIcon>
+              <ListItemText primary="Login" />
+            </ListItem>
+            <ListItem
+              button
+              selected={location.pathname === '/register'}
+              onClick={() => handleNavigation('/register')}
+            >
+              <MuiListItemIcon><PersonAddIcon /></MuiListItemIcon>
+              <ListItemText primary="Sign Up" />
+            </ListItem>
+          </>
+        )}
       </List>
     </Drawer>
-  );
-
-  const renderDesktopNavigation = () => (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      {menuItems.map((item) => (
-        <Button
-          key={item.text}
-          startIcon={item.icon}
-          onClick={() => handleNavigation(item.path)}
-          sx={{
-            color: location.pathname === item.path ? 'primary.main' : 'text.primary',
-            '&:hover': {
-              backgroundColor: 'rgba(37, 99, 235, 0.04)',
-            },
-          }}
-        >
-          {item.text}
-        </Button>
-      ))}
-    </Box>
   );
 
   return (
     <>
       <MuiAppBar position="fixed">
         <Toolbar>
-          {isMobile ? (
+          {isMobile && isAuthenticated && (
             <IconButton
               edge="start"
               color="inherit"
@@ -159,28 +167,25 @@ const AppBar = () => {
             >
               <MenuIcon />
             </IconButton>
-          ) : (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography
-                variant="h6"
-                component={RouterLink}
-                to="/"
-                sx={{
-                  textDecoration: 'none',
-                  color: 'primary.main',
-                  fontWeight: 700,
-                  mr: 2,
-                }}
-              >
-                BeOnTime
-              </Typography>
-              {renderDesktopNavigation()}
-            </Box>
           )}
+
+          <Typography
+            variant="h6"
+            component={RouterLink}
+            to="/"
+            sx={{
+              textDecoration: 'none',
+              color: 'primary.main',
+              fontWeight: 700,
+              mr: 2,
+            }}
+          >
+            BeOnTime
+          </Typography>
 
           <Box sx={{ flexGrow: 1 }} />
 
-          {user ? (
+          {isAuthenticated ? (
             <>
               <Tooltip title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
                 <IconButton 
@@ -199,11 +204,11 @@ const AppBar = () => {
                 sx={{ ml: 1 }}
               >
                 <Avatar
-                  src={user.profilePicture}
-                  alt={user.username}
+                  src={user?.profilePicture}
+                  alt={user?.username}
                   sx={{ width: 32, height: 32 }}
                 >
-                  {user.username?.charAt(0).toUpperCase() || 'U'}
+                  {user?.username?.charAt(0).toUpperCase() || 'U'}
                 </Avatar>
               </IconButton>
 
@@ -220,6 +225,18 @@ const AppBar = () => {
                   },
                 }}
               >
+                <MenuItem onClick={handleProfilePopupOpen}>
+                  <ListItemIcon>
+                    <Avatar
+                      src={user?.profilePicture}
+                      alt={user?.username}
+                      sx={{ width: 24, height: 24 }}
+                    >
+                      {user?.username?.charAt(0).toUpperCase() || 'U'}
+                    </Avatar>
+                  </ListItemIcon>
+                  Profile
+                </MenuItem>
                 <MenuItem onClick={handleLogout}>
                   <ListItemIcon>
                     <LogoutIcon fontSize="small" />
@@ -251,7 +268,7 @@ const AppBar = () => {
         </Toolbar>
       </MuiAppBar>
 
-      {renderMobileMenu()}
+      {isMobile && isAuthenticated && renderMobileMenu()}
       <ProfilePopup open={profileOpen} onClose={() => setProfileOpen(false)} />
     </>
   );

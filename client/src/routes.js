@@ -1,6 +1,6 @@
 import React from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
-import { Box } from '@mui/material';
+import { Box, useTheme, useMediaQuery } from '@mui/material';
 import { useAuth } from './contexts/AuthContext';
 
 // Pages
@@ -34,14 +34,17 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const AppRoutes = () => {
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const { isAuthenticated } = useAuth();
+
   return (
     <Box sx={{ 
       display: 'flex',
-      flexDirection: { xs: 'column', md: 'row' },
       minHeight: '100vh'
     }}>
       <CustomAppBar />
-      <Sidebar />
+      {!isMobile && isAuthenticated && <Sidebar />}
       <Box 
         component="main" 
         sx={{ 
@@ -50,7 +53,8 @@ const AppRoutes = () => {
           width: '100%',
           mt: { xs: 8, md: 9 }, // Increased top margin to account for fixed AppBar
           minHeight: '100vh',
-          overflow: 'auto'
+          overflow: 'auto',
+          ml: { xs: 0, md: isAuthenticated ? '240px' : 0 } // Add margin to account for sidebar on desktop only when authenticated
         }}
       >
         <Routes>
