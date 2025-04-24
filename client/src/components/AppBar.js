@@ -58,9 +58,7 @@ const AppBar = () => {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget);
-  };
+
 
   const handleMenuClose = () => {
     setAnchorEl(null);
@@ -79,6 +77,13 @@ const AppBar = () => {
 
   const handleMobileMenuToggle = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleNavigation = (path) => {
+    navigate(path);
+    if (isMobile) {
+      setMobileMenuOpen(false);
+    }
   };
 
   const renderMobileMenu = () => (
@@ -103,11 +108,9 @@ const AppBar = () => {
         {menuItems.map((item) => (
           <ListItem
             button
-            component={RouterLink}
-            to={item.path}
             key={item.text}
             selected={location.pathname === item.path}
-            onClick={handleMobileMenuToggle}
+            onClick={() => handleNavigation(item.path)}
           >
             <MuiListItemIcon>{item.icon}</MuiListItemIcon>
             <ListItemText primary={item.text} />
@@ -122,19 +125,58 @@ const AppBar = () => {
     </Drawer>
   );
 
+  const renderDesktopNavigation = () => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      {menuItems.map((item) => (
+        <Button
+          key={item.text}
+          startIcon={item.icon}
+          onClick={() => handleNavigation(item.path)}
+          sx={{
+            color: location.pathname === item.path ? 'primary.main' : 'text.primary',
+            '&:hover': {
+              backgroundColor: 'rgba(37, 99, 235, 0.04)',
+            },
+          }}
+        >
+          {item.text}
+        </Button>
+      ))}
+    </Box>
+  );
+
   return (
     <>
       <MuiAppBar position="fixed">
         <Toolbar>
-          <IconButton
-            edge="start"
-            color="inherit"
-            aria-label="menu"
-            onClick={isMobile ? handleMobileMenuToggle : handleMenuOpen}
-            sx={{ mr: 2 }}
-          >
-            <MenuIcon />
-          </IconButton>
+          {isMobile ? (
+            <IconButton
+              edge="start"
+              color="inherit"
+              aria-label="menu"
+              onClick={handleMobileMenuToggle}
+              sx={{ mr: 2 }}
+            >
+              <MenuIcon />
+            </IconButton>
+          ) : (
+            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+              <Typography
+                variant="h6"
+                component={RouterLink}
+                to="/"
+                sx={{
+                  textDecoration: 'none',
+                  color: 'primary.main',
+                  fontWeight: 700,
+                  mr: 2,
+                }}
+              >
+                BeOnTime
+              </Typography>
+              {renderDesktopNavigation()}
+            </Box>
+          )}
 
           <Box sx={{ flexGrow: 1 }} />
 
