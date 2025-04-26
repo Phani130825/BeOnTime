@@ -207,15 +207,25 @@ const HabitForm = ({ open, onClose, onSave, habit = null }) => {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleReminderChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({
-      ...prev,
-      notifications: {
-        ...prev.notifications,
-        [name]: value
-      }
-    }));
+  const handleReminderChange = (e, value) => {
+    if (typeof e === 'string') {
+      setFormData(prev => ({
+        ...prev,
+        notifications: {
+          ...prev.notifications,
+          [e]: value
+        }
+      }));
+    } else {
+      const { name, checked } = e.target;
+      setFormData(prev => ({
+        ...prev,
+        notifications: {
+          ...prev.notifications,
+          [name]: checked
+        }
+      }));
+    }
   };
 
   const handleStartDateChange = (newValue) => {
@@ -499,7 +509,7 @@ const HabitForm = ({ open, onClose, onSave, habit = null }) => {
                   control={
                     <Switch
                       checked={formData.notifications.enabled}
-                      onChange={handleReminderChange}
+                      onChange={(e) => handleReminderChange(e, e.target.checked)}
                     />
                   }
                   label="Enable Reminder"
@@ -627,7 +637,7 @@ const HabitForm = ({ open, onClose, onSave, habit = null }) => {
                   control={
                     <Switch
                       checked={formData.notifications.enabled}
-                      onChange={(e) => handleReminderChange('enabled', e.target.checked)}
+                      onChange={(e) => handleReminderChange(e, e.target.checked)}
                     />
                   }
                   label="Notify at start time"
@@ -638,7 +648,7 @@ const HabitForm = ({ open, onClose, onSave, habit = null }) => {
                   control={
                     <Switch
                       checked={formData.notifications.endEnabled}
-                      onChange={(e) => handleReminderChange('endEnabled', e.target.checked)}
+                      onChange={(e) => handleReminderChange(e, e.target.checked)}
                     />
                   }
                   label="Notify before end time"
@@ -652,7 +662,7 @@ const HabitForm = ({ open, onClose, onSave, habit = null }) => {
                       type="number"
                       size="small"
                       value={formData.notifications.endReminderMinutes}
-                      onChange={(e) => handleReminderChange('endReminderMinutes', parseInt(e.target.value) || 5)}
+                      onChange={(e) => handleReminderChange(e, parseInt(e.target.value) || 5)}
                       inputProps={{ min: 1, max: 60 }}
                       sx={{ width: 80 }}
                     />

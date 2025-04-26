@@ -485,6 +485,10 @@ const Pomodoro = () => {
         return [...prev, ...uniqueNewSessions];
       });
       
+      // Update pomodoros count based on work sessions
+      const workSessionsCount = formattedSessions.filter(s => s.type === 'work').length;
+      setPomodorosCompleted(prev => prev + workSessionsCount);
+      
       setHasMore(more);
       setPage(prev => prev + 1);
     } catch (error) {

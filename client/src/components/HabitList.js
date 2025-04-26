@@ -9,7 +9,6 @@ import {
   InputLabel,
   Select,
   MenuItem,
-  IconButton,
   Tooltip,
   useTheme,
   Paper,
@@ -22,10 +21,7 @@ import {
 } from '@mui/material';
 import {
   Search as SearchIcon,
-  
-  
   Add as AddIcon,
-  
 } from '@mui/icons-material';
 import { AnimatePresence } from 'framer-motion';
 import {  isSameDay, isBefore, isAfter,  subMinutes } from 'date-fns';
@@ -148,6 +144,27 @@ const HabitList = () => {
     setNotification(null);
   };
 
+  const handleSortChange = (event) => {
+    const value = event.target.value;
+    setSortBy(value);
+    
+    // Set default sort order based on the sort type
+    switch (value) {
+      case 'title':
+      case 'category':
+        setSortOrder('asc'); // Alphabetical sorts default to ascending
+        break;
+      case 'createdAt':
+      case 'streak':
+      case 'progress':
+      case 'startTime':
+        setSortOrder('desc'); // Numeric and date sorts default to descending
+        break;
+      default:
+        setSortOrder('desc');
+    }
+  };
+
   const filteredAndSortedHabits = useMemo(() => {
     let result = [...habits];
 
@@ -170,22 +187,18 @@ const HabitList = () => {
     const now = new Date();
     if (selectedTab === 1) { // Today's Tasks
       result = result.filter(habit => {
-        // Check if habit is active today
         const startDate = new Date(habit.startDate);
         const endDate = habit.endDate ? new Date(habit.endDate) : null;
         
-        // If habit has no end date, it's ongoing
         if (!endDate) {
           return isSameDay(startDate, now) || isBefore(startDate, now);
         }
         
-        // If habit has an end date, check if today is between start and end dates
         return (isSameDay(startDate, now) || isBefore(startDate, now)) && 
                (isSameDay(endDate, now) || isAfter(endDate, now));
       });
     } else if (selectedTab === 2) { // Completed
       result = result.filter(habit => {
-        // Check if habit has any completion records for today
         if (!habit.completions || !Array.isArray(habit.completions)) return false;
         return habit.completions.some(completion => {
           if (!completion || typeof completion !== 'object') return false;
@@ -198,32 +211,49 @@ const HabitList = () => {
     // Apply sorting
     result.sort((a, b) => {
       let comparison = 0;
+      
       switch (sortBy) {
         case 'createdAt':
-          return new Date(a.createdAt) - new Date(b.createdAt);
+          comparison = new Date(a.createdAt) - new Date(b.createdAt);
+          break;
         case 'title':
-          return a.title.localeCompare(b.title);
+          comparison = a.title.localeCompare(b.title);
+          break;
         case 'category':
-          return a.category.localeCompare(b.category);
+          comparison = a.category.localeCompare(b.category);
+          break;
         case 'streak':
           comparison = (a.streak || 0) - (b.streak || 0);
           break;
         case 'progress':
-          comparison = (a.progress || 0) - (b.progress || 0);
+          // Ensure progress is a number and handle undefined/null values
+          const aProgress = typeof a.progress === 'number' ? a.progress : 0;
+          const bProgress = typeof b.progress === 'number' ? b.progress : 0;
+          comparison = aProgress - bProgress;
           break;
         case 'startTime':
-          if (!a.startDate || !a.startTime || !b.startDate || !b.startTime) {
-            return 0;
+          // Handle start time sorting
+          if (!a.startTime || !b.startTime) {
+            // If either is missing, put the one with a time first
+            if (!a.startTime && !b.startTime) return 0;
+            return a.startTime ? -1 : 1;
           }
-          const aStart = new Date(a.startDate);
-          aStart.setHours(new Date(a.startTime).getHours(), new Date(a.startTime).getMinutes(), 0, 0);
-          const bStart = new Date(b.startDate);
-          bStart.setHours(new Date(b.startTime).getHours(), new Date(b.startTime).getMinutes(), 0, 0);
-          comparison = aStart - bStart;
+          
+          // Parse time strings (HH:mm format)
+          const [aHours, aMinutes] = a.startTime.split(':').map(Number);
+          const [bHours, bMinutes] = b.startTime.split(':').map(Number);
+          
+          // Compare hours first, then minutes
+          if (aHours !== bHours) {
+            comparison = aHours - bHours;
+          } else {
+            comparison = aMinutes - bMinutes;
+          }
           break;
         default:
           return 0;
       }
+      
       return sortOrder === 'desc' ? -comparison : comparison;
     });
 
@@ -421,25 +451,6 @@ const HabitList = () => {
     }
   };
 
-  const handleSortChange = (event) => {
-    const value = event.target.value;
-    setSortBy(value);
-    switch (value) {
-      case 'title':
-        setSortOrder('asc');
-        break;
-      case 'createdAt':
-        setSortOrder('desc');
-        break;
-      case 'priority':
-        setSortOrder('desc');
-        break;
-      default:
-        setSortOrder('desc');
-        break;
-    }
-  };
-
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" minHeight="60vh">
@@ -517,13 +528,33 @@ const HabitList = () => {
           </Grid>
           <Grid item xs={12} md={2}>
             <Tooltip title="Add New Habit">
-              <IconButton
+              <Button
+                variant="contained"
                 color="primary"
                 onClick={() => setIsFormOpen(true)}
-                sx={{ width: '100%', height: 56, border: `1px solid ${theme.palette.primary.main}` }}
+                startIcon={<AddIcon />}
+                sx={{
+                  width: '100%',
+                  height: 56,
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
+                  transition: 'all 0.3s ease',
+                  '&:hover': {
+                    transform: 'translateY(-2px)',
+                    boxShadow: '0 6px 12px rgba(0, 0, 0, 0.15)',
+                    backgroundColor: theme.palette.primary.dark,
+                  },
+                  '&:active': {
+                    transform: 'translateY(0)',
+                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+                  },
+                  fontWeight: 'bold',
+                  textTransform: 'none',
+                  fontSize: '1rem',
+                }}
               >
-                <AddIcon />
-              </IconButton>
+                Add Habit
+              </Button>
             </Tooltip>
           </Grid>
         </Grid>
